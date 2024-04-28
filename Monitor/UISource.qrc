@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/qss">
+        <file>Monitor.qss</file>
+        <file>image/arrow-down.png</file>
+        <file>image/arrow-down-hover.png</file>
+        <file>image/arrow-down-pressed.png</file>
+        <file>image/arrow-left.png</file>
+        <file>image/arrow-left-hover.png</file>
+        <file>image/arrow-left-pressed.png</file>
+        <file>image/arrow-right.png</file>
+        <file>image/arrow-right-hover.png</file>
+        <file>image/arrow-right-pressed.png</file>
+        <file>image/arrow-up.png</file>
+        <file>image/arrow-up-hover.png</file>
+        <file>image/arrow-up-pressed.png</file>
+        <file>image/grayb.png</file>
+        <file>image/grays.png</file>
+        <file>image/greenb.png</file>
+        <file>image/greens.png</file>
+        <file>image/redb.png</file>
+        <file>image/reds.png</file>
+        <file>image/db_failed.png</file>
+        <file>image/db_success.png</file>
+    </qresource>
+</RCC>

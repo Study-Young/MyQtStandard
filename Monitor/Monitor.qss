@@ -1,0 +1,439 @@
+﻿/****************************************************
+*   @projectName    FT6500
+*   @fileName       FT6500.qss
+*   @brief          摘要
+*   @author         hongweiYang
+*   @date           2022-08-18
+**************************************************/
+
+/**** 主界面边框 ****/
+QWidget#centralwidget{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+/**** 标题栏 ****/
+QWidget#widget_title{
+    background: rgb(0, 32, 96);
+    /*background: rgb(245, 245, 245);*/
+}
+
+QLabel#label_logo{
+    max-width: 89px;
+    min-width: 89px;
+    max-height: 50px;
+    min-height: 50px;
+    border-image: url(:/image/image/LOGO.png);
+    background: rgb(245, 245, 245);
+}
+
+QLabel#label_softwareName{
+    font-family: "黑体";
+    font-size: 50px;
+    font-weight: bold; 
+    color: rgb(102, 255, 255);
+    /*color: rgb(0, 32, 96);*/
+}
+
+QLabel#label_version{
+    font-family: "黑体";
+    font-size: 20px;
+    color: rgb(102, 255, 255);
+    /*color: rgb(0, 32, 96);*/
+}
+
+QPushButton#pushButton_topology, #pushButton_boardMonitor, #pushButton_deviceUpdate, #pushButton_databaseMonitor{
+    border: 2px solid rgb(200, 200, 200);
+    color: rgb(102, 255, 255);
+    background-color: rgb(0, 112, 192);
+    min-width: 70px;
+    min-height: 50px;
+    font-family: "黑体";
+    font-size: 15px;
+}
+
+QPushButton#pushButton_topology:hover, #pushButton_boardMonitor:hover, #pushButton_deviceUpdate:hover, #pushButton_databaseMonitor:hover{
+    background-color: rgb(32, 56, 100);
+}
+
+QPushButton#pushButton_topology:pressed, #pushButton_boardMonitor:pressed, #pushButton_deviceUpdate:pressed, #pushButton_databaseMonitor:pressed{
+    background-color: rgb(0, 112, 192);
+}
+
+QPushButton#pushButton_topology[status = 'normal']{
+    border-color: rgb(200, 200, 200);
+}
+
+QPushButton#pushButton_topology[status = 'abnormal']{
+    border-color: red;
+}
+
+/**** UTC时间 ****/
+QWidget#widget_utc{
+    background: rgb(0, 176, 240);
+}
+
+QLabel#label_utc{
+    font-size: 40px;
+    font-weight: bold;
+    color: rgb(255, 192, 0);
+    min-height: 40px;
+    max-height: 40px;
+}
+
+/**** 拓扑图 ***/
+/*
+QComboBox#comboBox_user{
+    border: 1px solid gray;
+    color: black;
+    background-color: rgb(250, 250, 250);
+    max-width: 200px;
+    max-height: 30px;
+    min-width: 200px;
+    min-height: 30px;
+    font-family: "黑体";
+    font-size: 20px;
+    combobox-popup: 0;
+}
+
+QComboBox QAbstractItemView{
+    color: black;
+    font-family: "黑体";
+    font-size: 16px;
+    border: 2px solid gray;
+    background-color: rgb(225, 225, 225);
+}
+
+QComboBox QAbstractItemView::item{
+    height: 30px;
+}
+
+QComboBox QAbstractScrollArea QScrollBar:vertical{
+    width: 30px;
+}
+
+QComboBox QAbstractScrollArea QScrollBar::handle:vertical{
+    background-color: rgb(160, 160, 160);
+}
+
+QComboBox QAbstractScrollArea QScrollBar::handle:vertical:hover{
+    background-color: rgb(90, 91, 93);
+}
+
+QComboBox::drop-down{
+    subcontrol-position: center right;
+    image: url(:/image/image/arrow-up.png);
+}
+
+QComboBox::drop-down:on{
+    image: url(:/image/image/arrow-down-pressed.png);
+}
+*/
+
+QLabel#label_linkA, #label_linkB, #label_linkC{
+    font-family: "黑体";
+    font-size: 40px;
+    font-weight: bold;
+    color: rgb(192, 0, 0);
+}
+
+QLabel#label_linkA_devOnlineCnt, #label_linkB_devOnlineCnt, #label_linkC_devOnlineCnt{
+    font-family: "黑体";
+    font-size: 40px;
+    font-weight: bold;
+    color: rgb(255, 192, 0);
+}
+
+QWidget#widget_warnningInfo{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QWidget#widget_sysWarnningLabel{
+    background-color: rgb(46, 117, 181);
+}
+
+QLabel#label_warnningInfo{
+    font-family: "黑体";
+    font-size: 25px;
+    font-weight: bold;
+    color: red;
+}
+
+/**** 站点 ***/
+QWidget#page_site{
+    background: rgb(0, 32, 96);
+}
+
+QWidget#widget_staLed{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QLabel#label_lockSta, #label_alarmSta{
+    max-height: 170px;
+    font-family: "黑体";
+    font-size: 26px;
+    color: rgb(255, 255, 0);
+}
+
+QLabel#label_lockStaLed, #label_alarmStaLed{
+    max-width: 30px;
+    max-height: 30px;
+    border-image: url(:/image/image/grayb.png);
+}
+
+QLabel#label_lockStaLed[status = 'true']{
+    border-image: url(:/image/image/greenb.png);
+}
+
+QLabel#label_alarmStaLed[status = 'true']{
+    border-image: url(:/image/image/grayb.png);
+}
+
+QLabel#label_lockStaLed[status = 'false'], #label_alarmStaLed[status = 'false']{
+    border-image: url(:/image/image/redb.png);
+}
+
+QWidget#widget_siteInfo{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QLabel#label_siteName, #label_ip_port, #label_timeDiff{
+    border: 2px solid rgb(0, 255, 255);
+    font-family: "黑体";
+    font-size: 26px;
+    color: rgb(0, 255, 255);
+    background-color: rgb(32, 56, 100);
+    max-height: 100px;
+}
+
+QLabel#label_calTimeDiff{
+    border: 2px solid rgb(0, 255, 255);
+    font-family: "黑体";
+    font-size: 20px;
+    color: rgb(0, 255, 255);
+    background-color: rgb(32, 56, 100);
+    max-height: 100px;
+}
+
+QPushButton#pushButton_stop, #pushButton_showAll, #pushButton_plotXAxisType, #pushButton_clearPlot{
+    border-top: 3px solid rgb(250, 250, 250);
+    border-left: 3px solid rgb(192, 192, 192);
+    border-bottom: 3px solid rgb(192, 192, 192);
+    border-right: 3px solid rgb(192, 192, 192);
+    color: rgb(32, 56, 100);
+    background-color: rgb(240, 240, 240);
+    max-width:80px;
+    max-height:30px;
+    min-width:80px;
+    min-height:30px;
+    font-family: "黑体";
+    font-size: 20px;
+    font-weight: bold;
+}
+
+QPushButton#pushButton_stop:hover, #pushButton_showAll:hover,
+           #pushButton_plotXAxisType:hover, #pushButton_clearPlot:hover{
+    background-color: rgb(150, 150, 150);
+}
+
+QPushButton#pushButton_stop:pressed, #pushButton_showAll:pressed,
+           #pushButton_plotXAxisType:pressed, #pushButton_clearPlot:pressed{
+    background-color: rgb(220, 220, 220);
+}
+
+/**** 链路监测-本地端 ***/
+QWidget#page_local{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QWidget#widget_linkMonitorLabel{
+    background-color: rgb(0, 254, 254);
+}
+
+QLabel#label_linkMonitor{
+    font-family: "黑体";
+    font-size: 35px;
+    font-weight: bold;
+    color: rgb(0, 32, 96);
+}
+
+QWidget#widget_linkMonitorLabel{
+    background-color: rgb(0, 176, 240);
+}
+
+QLabel#label_linkMonitor{
+    font-family: "黑体";
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(32, 56, 100);
+}
+
+QHeaderView::section:horizontal{
+    color:rgb(102,255,255);
+    background:rgb(82,82,82);
+    height:40px;
+}
+
+/**** 链路监测-中继、终端 ***/
+QWidget#page_relay{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QWidget#widget_recvLabel, #widget_calLabel{
+    background-color: rgb(30, 78, 121);
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QLabel#label_recv, #label_cal{
+    font-family: "黑体";
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(0, 254, 254);
+}
+
+#line_relay, #line_recv, #line_boardMonitor{
+    background-color: rgb(0, 176, 240);
+}
+
+/**** 板卡管理 ****/
+QWidget#page_boardMonitor{
+    border: 3px solid rgb(0, 176, 240);
+}
+
+QWidget#widget_netSet, #widget_siteSet, #widget_timeSet, #widget_timeCompareBoard1Set{
+    background-color: rgb(32, 56, 100);
+}
+
+QPushButton#pushButton_boardInfo, #pushButton_netSet, #pushButton_siteSet, 
+           #pushButton_timeDelaySet, #pushButton_versionCheck{
+    border-top: 3px solid rgb(250, 250, 250);
+    border-left: 3px solid rgb(192, 192, 192);
+    border-bottom: 3px solid rgb(192, 192, 192);
+    border-right: 3px solid rgb(192, 192, 192);
+    color: rgb(32, 56, 100);
+    background-color: rgb(240, 240, 240);
+    max-width:120px;
+    max-height:30px;
+    min-width:120px;
+    min-height:30px;
+    font-family: "黑体";
+    font-size: 20px;
+    font-weight: bold;
+}
+
+QPushButton#pushButton_boardInfo:hover, #pushButton_netSet:hover, #pushButton_siteSet:hover,
+           #pushButton_timeDelaySet:hover, #pushButton_versionCheck:hover{
+    background-color: rgb(150, 150, 150);
+}
+
+QPushButton#pushButton_boardInfo:pressed, #pushButton_netSet:pressed, #pushButton_siteSet:pressed,
+           #pushButton_timeDelaySet:pressed, #pushButton_versionCheck:pressed{
+    background-color: rgb(220, 220, 220);
+}
+
+QLabel#label_utcTime, #label_netSetTitle, #label_siteSetTitle, 
+      #label_timeDelayTitle, #label_softwareVersionTitle{
+    background-color: rgb(0, 112, 192);
+    font-family: "黑体";
+    font-size: 35px;
+    font-weight: bold;
+    color: white;
+}
+
+QLabel#label_linkIdTag, #label_linkId,
+      #label_deviceIdTag, #label_deviceId,
+      #label_deviceTypeTag, #label_deviceType,
+      #label_deviceNumberTag, #label_deviceNumber,
+      #label_linkStaTag, #label_linkSta,
+      #label_deviceWorkStaTag, #label_deviceWorkSta,
+      #label_linkRealTimeDelayTag, #label_linkRealTimeDelay, #label_linkRealTimeDelayUnit,
+      #label_localTimeDiffTag, #label_localTimeDiff, #label_localTimeDiffUnit,
+      #label_curTimeDelayTag, #label_curTimeDelay, #label_curTimeDelayUnit,
+      #label_CurTimeSlotTag, #label_CurTimeSlot, #label_CurTimeSlotUnit,
+      #label_distanceTag, #label_distance, #label_distanceUnit,
+      #label_alarmTag, #label_alarm,
+      #label_fiber1SendPowerTag, #label_fiber1SendPower, #label_fiber1SendPowerUnit,
+      #label_fiber2SendPowerTag, #label_fiber2SendPower, #label_fiber2SendPowerUnit,
+      #label_fiber1RecvPowerTag, #label_fiber1RecvPower, #label_fiber1RecvPowerUnit,
+      #label_fiber2RecvPowerTag, #label_fiber2RecvPower, #label_fiber2RecvPowerUnit,
+      #label_fiber1TempTag, #label_fiber1Temp, #label_fiber1TempUnit,
+      #label_fiber2TempTag, #label_fiber2Temp, #label_fiber2TempUnit,
+      #label_bcd1OutputStaTag, #label_bcd1OutputSta,
+      #label_bcd2OutputStaTag, #label_bcd2OutputSta,
+      #label_bcd3OutputStaTag, #label_bcd3OutputSta,
+      #label_bcd4OutputStaTag, #label_bcd4OutputSta,
+      #label_1ppsInputStaTag, #label_1ppsInputSta,
+      #label_10MInputStaTag, #label_10MInputSta,
+      #label_timeCodeInputStaTag, #label_timeCodeInputSta,
+      #label_ipAddressSetTag, #label_maskSetTag, #label_gatewaySetTag,
+      #label_linkIdSetTag, #label_siteAddressSetTag, #label_siteTypeSetTag,
+      #label_timeDelayCompensationSetTag, #label_timeDelayCompensationSetUnit,
+      #label_modulationTimeIntervalSetTag, #label_modulationTimeIntervalSetUnit,
+      #label_timeDelayCompensationSetTag_local, #label_timeDelayCompensationSetDeviceIdTag,
+      #label_timeDelayCompensationSetValueTag, #label_timeDelayCompensationSetUnit_local,
+      #label_boardNameTag, #label_armVersionTag, #label_fpgaVersionTag,
+      #label_monitorBoardTag, #label_monitorBoardArmVersion, #label_monitorBoardFpgaVersion,
+      #label_fiberBoardTag, #label_fiberBoardArmVersion, #label_fiberBoardFpgaVersion,
+      #label_electricBoardTag, #label_electricBoardArmVersion, #label_electricBoardFpgaVersion,
+      #label_bcodeBoardTag, #label_bcodeBoardArmVersion, #label_bcodeBoardFpgaVersion
+      {
+    font-family: "黑体";
+    font-size: 25px;
+    font-weight: bold;
+    color: rgb(255, 255, 0);
+}
+
+QLineEdit#lineEdit_ipAddress, #lineEdit_mask, #lineEdit_gateway,
+         #lineEdit_linkId, #lineEdit_deviceId,
+         #lineEdit_timeDelayCompensation, #lineEdit_modulationTimeInterval,
+         #lineEdit_timeDelayCompensation_deviceId, #lineEdit_timeDelayCompensation_timeDiff{
+    max-width:300px;
+    max-height:30px;
+    min-width:300px;
+    min-height:30px;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+QPushButton#pushButton_ipAddressSet, #pushButton_maskSet, #pushButton_gatewaySet, 
+           #pushButton_linkIdSet, #pushButton_deviceIdSet, #pushButton_deviceTypeSet,
+           #pushButton_timeDelayCompensationSet, #pushButton_modulationTimeIntervalSet,
+           #pushButton_timeDelayCompensationSet_local, #pushButton_softwareRestart{
+    border-top: 2px solid rgb(250, 250, 250);
+    border-left: 2px solid rgb(192, 192, 192);
+    border-bottom: 2px solid rgb(192, 192, 192);
+    border-right: 2px solid rgb(192, 192, 192);
+    color: rgb(32, 56, 100);
+    background-color: rgb(240, 240, 240);
+    max-width:100px;
+    max-height:25px;
+    min-width:100px;
+    min-height:25px;
+    font-family: "黑体";
+    font-size: 18px;
+}
+
+QPushButton#pushButton_ipAddressSet:hover, #pushButton_maskSet:hover, #pushButton_gatewaySet:hover,
+           #pushButton_linkIdSet:hover, #pushButton_deviceIdSet:hover, #pushButton_deviceTypeSet:hover,
+           #pushButton_timeDelayCompensationSet:hover, #pushButton_modulationTimeIntervalSet:hover,
+           #pushButton_timeDelayCompensationSet_local:hover, #pushButton_softwareRestart:hover{
+    background-color: rgb(150, 150, 150);
+}
+
+QPushButton#pushButton_ipAddressSet:pressed, #pushButton_maskSet:pressed, #pushButton_gatewaySet:pressed,
+           #pushButton_linkIdSet:pressed, #pushButton_deviceIdSet:pressed, #pushButton_deviceTypeSet:pressed,
+           #pushButton_timeDelayCompensationSet:pressed, #pushButton_modulationTimeIntervalSet:pressed,
+           #pushButton_timeDelayCompensationSet_local:pressed, #pushButton_softwareRestart:pressed{
+    background-color: rgb(220, 220, 220);
+}
+
+QDateTimeEdit#dateTimeEdit_currentTime{
+    border: 1px solid gray;
+    color: black;
+    background-color: rgb(250, 250, 250);
+    max-width: 230px;
+    max-height: 30px;
+    min-width: 230px;
+    min-height: 30px;
+    font-family: "黑体";
+    font-size: 20px;
+}
