@@ -37,7 +37,7 @@
           <height>16777215</height>
          </size>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,3,0,0,0,0,2,0,1">
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,3,0,0,0,0,0,0,0">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
@@ -83,23 +83,69 @@
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_showInfo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>查看</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QComboBox" name="comboBox_readType">
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考1PPS-A相差值</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考1PPS-B相差值</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考1PPS-C相差值</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考1PPS-D相差值</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考10M-A频率准确度</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考10M-B频率准确度</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考10M-C频率准确度</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备参考10M-D频率准确度</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>多通道无缝切换设备铷钟频率准确度</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>信号再生净化设备频率准确度</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>信号再生净化设备参考1PPS相差值</string>
+              </property>
+             </item>
+            </widget>
+           </item>
            <item>
             <widget class="QPushButton" name="pushButton_read">
              <property name="sizePolicy">
@@ -123,19 +169,6 @@
              </property>
              <property name="text">
               <string>导出</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_analyzeWidgetShowHide">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>隐藏</string>
              </property>
             </widget>
            </item>
@@ -382,29 +415,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QTextBrowser" name="textBrowser_log">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>575</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QWidget" name="widget_plotSet" native="true">
            <layout class="QGridLayout" name="gridLayout_4">
             <property name="leftMargin">
@@ -421,6 +431,18 @@
             </property>
             <item row="0" column="0">
              <widget class="QGroupBox" name="groupBox_chSlc">
+              <property name="styleSheet">
+               <string notr="true">#groupBox_chSlc{
+	border: 1px solid black;
+	margin-top:2.3ex;
+}
+
+#groupBox_chSlc::title{
+	subcontrol-origin:margin;
+	left:10px;
+	padding:0 0px;
+}</string>
+              </property>
               <property name="title">
                <string>绘图设置</string>
               </property>
@@ -450,7 +472,7 @@
                  <item>
                   <widget class="QDateTimeEdit" name="dateTimeEdit_plotStart">
                    <property name="displayFormat">
-                    <string>yyyy-MM-dd HH:mm:ss:zzz</string>
+                    <string>yyyy-MM-dd HH:mm:ss</string>
                    </property>
                    <property name="calendarPopup">
                     <bool>true</bool>
@@ -474,7 +496,7 @@
                  <item>
                   <widget class="QDateTimeEdit" name="dateTimeEdit_plotEnd">
                    <property name="displayFormat">
-                    <string>yyyy-MM-dd HH:mm:ss:zzz</string>
+                    <string>yyyy-MM-dd HH:mm:ss</string>
                    </property>
                    <property name="calendarPopup">
                     <bool>true</bool>
@@ -622,6 +644,29 @@
            </layout>
           </widget>
          </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextBrowser" name="textBrowser_log">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>575</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -636,7 +681,7 @@
        <widget class="QWidget" name="widget_function" native="true">
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="1">
-          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="5,0,5">
+          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="4,0,5">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="10,0,1">
              <item>
@@ -655,6 +700,13 @@
                 <widget class="QPushButton" name="pushButton_showAll">
                  <property name="text">
                   <string>全显</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_adev">
+                 <property name="text">
+                  <string>ADEV</string>
                  </property>
                 </widget>
                </item>
@@ -689,13 +741,6 @@
                 <widget class="QPushButton" name="pushButton_clear">
                  <property name="text">
                   <string>清空</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_databaseShowHide">
-                 <property name="text">
-                  <string>隐藏</string>
                  </property>
                 </widget>
                </item>

@@ -29,16 +29,25 @@ include ($$PWD/ConfigManagement/ConfigManagement.pri)
 include ($$PWD/UserManagement/UserManagement.pri)
 
 SOURCES += \
+    catalogwidget.cpp \
+    catalogwidget2.cpp \
     global.cpp \
+    iconwidget.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    catalogwidget.h \
+    catalogwidget2.h \
     datastruct.h \
     global.h \
+    iconwidget.h \
     mainwindow.h
 
 FORMS += \
+    catalogwidget.ui \
+    catalogwidget2.ui \
+    iconwidget.ui \
     mainwindow.ui
 
 RESOURCES += \

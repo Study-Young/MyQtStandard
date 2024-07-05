@@ -4,6 +4,21 @@
 #include <QListView>
 #include <QDebug>
 
+UserManagement *UserManagement::m_pInstance = nullptr;
+UserManagement *UserManagement::getInstance()
+{
+    if(m_pInstance == nullptr)
+    {
+        m_pInstance = new UserManagement();
+    }
+    return m_pInstance;
+}
+
+void UserManagement::deleteInstance()
+{
+    delete m_pInstance;
+}
+
 UserManagement::UserManagement(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::UserManagement)
@@ -18,16 +33,6 @@ UserManagement::UserManagement(QWidget *parent) :
 UserManagement::~UserManagement()
 {
     delete ui;
-}
-
-UserManagement *UserManagement::m_pInstance = nullptr;
-UserManagement *UserManagement::getInstance()
-{
-    if(m_pInstance == nullptr)
-    {
-        m_pInstance = new UserManagement();
-    }
-    return m_pInstance;
 }
 
 void UserManagement::uiInit()

@@ -14,313 +14,388 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_5">
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
-      <item>
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="currentIndex">
-         <number>2</number>
-        </property>
-        <widget class="QWidget" name="tab">
-         <attribute name="title">
-          <string>Tab 1</string>
-         </attribute>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,1">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QPushButton" name="pushButton_commonPlot">
-                <property name="text">
-                 <string>Common</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_logPlot">
-                <property name="text">
-                 <string>Log</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
-              <item>
-               <widget class="QStackedWidget" name="stackedWidget_table">
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <widget class="QWidget" name="page_commonTable">
-                 <layout class="QGridLayout" name="gridLayout_3">
-                  <item row="0" column="0">
-                   <widget class="QTableView" name="tableView_commonTable"/>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QWidget" name="page_2"/>
-               </widget>
-              </item>
-              <item>
-               <widget class="QScrollArea" name="scrollArea">
-                <property name="widgetResizable">
-                 <bool>true</bool>
-                </property>
-                <widget class="QWidget" name="scrollAreaWidgetContents">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>69</width>
-                   <height>273</height>
-                  </rect>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_100">
-                  <item row="0" column="0">
-                   <layout class="QVBoxLayout" name="verticalLayout_showCurve">
-                    <item>
-                     <spacer name="verticalSpacer_7">
-                      <property name="orientation">
-                       <enum>Qt::Vertical</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>20</width>
-                        <height>340</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </widget>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QStackedWidget" name="stackedWidget_plot">
-              <property name="currentIndex">
-               <number>0</number>
-              </property>
-              <widget class="QWidget" name="page_commonPlot">
-               <layout class="QGridLayout" name="gridLayout_2">
-                <item row="0" column="0">
-                 <widget class="QWidget" name="widget_commonPlot" native="true"/>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="page_logPlot">
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="0" column="0">
-                 <widget class="QWidget" name="widget_logPlot" native="true"/>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-           </layout>
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+    <item>
+     <widget class="QWidget" name="widget_catalog" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QToolButton" name="toolButton_workLog">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>日志</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_plot">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>曲线图</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_dataTable">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>数据表</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_catalog">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>导航</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_icon">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>图标</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_button">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>按钮</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_delegate">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>代理</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QWidget" name="widget_lineTab3" native="true"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>472</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>3</number>
+      </property>
+      <widget class="QWidget" name="page_log">
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_350">
+          <property name="spacing">
+           <number>15</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="groupBox_59">
+            <property name="title">
+             <string>工作日志</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_63">
+             <item row="0" column="0">
+              <widget class="QTextBrowser" name="textBrowser_workLog"/>
+             </item>
+            </layout>
+           </widget>
           </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_2">
-         <attribute name="title">
-          <string>Tab 2</string>
-         </attribute>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_350">
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_175">
             <property name="spacing">
              <number>15</number>
             </property>
             <item>
-             <widget class="QGroupBox" name="groupBox_59">
+             <widget class="QGroupBox" name="groupBox_60">
               <property name="title">
-               <string>工作日志</string>
+               <string>操作日志</string>
               </property>
-              <layout class="QGridLayout" name="gridLayout_63">
-               <item row="0" column="0">
-                <widget class="QTextBrowser" name="textBrowser_workLog"/>
+              <layout class="QGridLayout" name="gridLayout_65">
+               <item row="0" column="1">
+                <widget class="QTextBrowser" name="textBrowser_operatorLog"/>
                </item>
               </layout>
              </widget>
             </item>
             <item>
-             <widget class="Line" name="line_3">
+             <widget class="Line" name="line_13">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_175">
-              <property name="spacing">
-               <number>15</number>
+             <widget class="QGroupBox" name="groupBox_61">
+              <property name="title">
+               <string>异常日志</string>
               </property>
-              <item>
-               <widget class="QGroupBox" name="groupBox_60">
-                <property name="title">
-                 <string>操作日志</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_65">
-                 <item row="0" column="1">
-                  <widget class="QTextBrowser" name="textBrowser_operatorLog"/>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
-               <widget class="Line" name="line_13">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QGroupBox" name="groupBox_61">
-                <property name="title">
-                 <string>异常日志</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_66">
-                 <item row="0" column="0">
-                  <widget class="QTextBrowser" name="textBrowser_errorLog"/>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
+              <layout class="QGridLayout" name="gridLayout_66">
+               <item row="0" column="0">
+                <widget class="QTextBrowser" name="textBrowser_errorLog"/>
+               </item>
+              </layout>
+             </widget>
             </item>
            </layout>
           </item>
          </layout>
-        </widget>
-        <widget class="QWidget" name="tab_3">
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_plot">
+       <widget class="QTabWidget" name="tabWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>771</width>
+          <height>541</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab_4">
          <attribute name="title">
-          <string>页</string>
+          <string>Tab 1</string>
          </attribute>
+         <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_commonPlot" native="true"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>52</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_100">
+              <item row="0" column="0">
+               <layout class="QVBoxLayout" name="verticalLayout_showCurve">
+                <item>
+                 <spacer name="verticalSpacer_7">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>340</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_5">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_logPlot" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_dataTable">
+       <widget class="QTableView" name="tableView_commonTable">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>170</y>
+          <width>567</width>
+          <height>214</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_catalog">
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0">
          <widget class="QWidget" name="widget_slide" native="true">
-          <property name="geometry">
-           <rect>
-            <x>320</x>
-            <y>140</y>
-            <width>571</width>
-            <height>31</height>
-           </rect>
-          </property>
           <property name="styleSheet">
            <string notr="true">
 QPushButton{
 	background:transparent;
 }</string>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
            <item>
-            <widget class="QPushButton" name="pushButton_1">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>btn1</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_2">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>btn2</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_3">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>btn3</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_4">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>btn4</string>
-             </property>
-            </widget>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QPushButton" name="pushButton_1">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>btn1</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>btn2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_3">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>btn3</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_4">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>btn4</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QWidget" name="widget_lineTab" native="true">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <spacer name="horizontalSpacer_3">
@@ -337,52 +412,470 @@ QPushButton{
            </item>
           </layout>
          </widget>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
-        <item>
-         <widget class="QLabel" name="label_dbSta">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="1" column="0">
+         <widget class="QStackedWidget" name="stackedWidget_catalog">
+          <property name="currentIndex">
+           <number>2</number>
           </property>
-          <property name="minimumSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
+          <widget class="QWidget" name="page">
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QWidget" name="widget_catalogWidget1" native="true"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_2">
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="0" column="0">
+             <widget class="QWidget" name="widget_catalogWidget2" native="true"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_3">
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="pushButton_messageTipsTest">
+              <property name="text">
+               <string>MessageTest</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="TriangleTab" name="widget_triangleTab" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>100</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_4">
+           <widget class="QWidget" name="layoutWidget">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>20</y>
+              <width>114</width>
+              <height>148</height>
+             </rect>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QWidget" name="widget_lineTab2" native="true">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QPushButton" name="pushButton_5">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
+                 <property name="text">
+                  <string>btn1</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widget_2" native="true"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_6">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>btn2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_7">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>btn3</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_8">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>30</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>btn4</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </widget>
          </widget>
         </item>
        </layout>
-      </item>
-     </layout>
+      </widget>
+      <widget class="QWidget" name="page_icon">
+       <layout class="QGridLayout" name="gridLayout_4" rowstretch="1,0">
+        <item row="0" column="0">
+         <widget class="QWidget" name="widget_iconWidget" native="true"/>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_12">
+          <item>
+           <widget class="QLabel" name="label_dbSta">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_button">
+       <widget class="MyCheckBox" name="checkBox">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>70</y>
+          <width>71</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>CheckBox</string>
+        </property>
+       </widget>
+       <widget class="MyCheckBox2" name="checkBox_2">
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>70</y>
+          <width>161</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>CheckBox</string>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>121</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Button1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="EllipseButton" name="widget" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>170</y>
+          <width>201</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>SwitchButton1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="SwitchButton" name="widget_switchButton1" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>220</y>
+          <width>201</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>SwitchButton2</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="NormalSwitch" name="widget_switchButton2" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_4">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>260</y>
+          <width>201</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>SwitchButton3</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="BoundarySwitchBase" name="widget_switchButton3" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_5">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>300</y>
+          <width>201</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>SwitchButton4</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="BoundarySwitchBase" name="widget_switchButton4" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_6">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>340</y>
+          <width>201</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>SwitchButton5</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="BoundarySwitchBase" name="widget_switchButton5" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_7">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>380</y>
+          <width>201</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>SwitchButton6</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LovelyHeartSwitch" name="widget_switchButton6" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -398,6 +891,54 @@ QPushButton{
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SwitchButton</class>
+   <extends>QWidget</extends>
+   <header>Model/MyButton/switchbutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EllipseButton</class>
+   <extends>QWidget</extends>
+   <header>Model/MyButton/ellipsebutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MyCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>Model/MyCheckBox/mycheckbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MyCheckBox2</class>
+   <extends>QCheckBox</extends>
+   <header>Model/MyCheckBox/mycheckbox2.h</header>
+  </customwidget>
+  <customwidget>
+   <class>NormalSwitch</class>
+   <extends>QWidget</extends>
+   <header>Model/MyButton/SapidSwitch/normalswitch.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BoundarySwitchBase</class>
+   <extends>QWidget</extends>
+   <header>Model/MyButton/SapidSwitch/boundaryswitchbase.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LovelyHeartSwitch</class>
+   <extends>QWidget</extends>
+   <header>Model/MyButton/SapidSwitch/lovelyheartswitch.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TriangleTab</class>
+   <extends>QWidget</extends>
+   <header>Model/MyTab/SapidTab/triangletab.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

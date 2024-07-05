@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     mainIint();
     connectSignalSlot();
 
-    setWindowTitle("光纤时间同步设备 V1.0.0");
+    setWindowTitle("RF4600时间净化系统 V1.0.1-RC1");
 }
 
 MainWindow::~MainWindow()
@@ -33,13 +33,6 @@ void MainWindow::connectSignalSlot()
 
 void MainWindow::memberValueInit()
 {
-    m_screenWidth = QApplication::desktop()->width();
-    m_screenHeight = QApplication::desktop()->height();
-    m_databaseWidgetWidth = 616;
-    m_analyzeWidgetWidth = 980;
-    m_width = 1600;
-    m_height = 900;
-
     m_pDataBase = new QSqlDatabase();    
     dataBaseInit();
     m_pModel = new DataBaseTableModel(*m_pDataBase);
@@ -49,37 +42,16 @@ void MainWindow::memberValueInit()
 
     m_selectDataTableName = "";
     m_selectDeviceInfoTableName = "";
-    m_selectDeviceId = 0;
-    m_selectLinkId = 0;
-    m_selectDeviceType = 0;
-    m_selectDeviceIp = "";
-
-    m_selectDeviceDataFlag = false;
 
     m_startPoint = -1;
     m_stopPoint = -1;
-
-    m_tdevKeys = {1.0, 2.0, 4.0, 10.0, 20.0, 40.0, 100.0, 200.0, 400.0,
-                  1000.0, 2000.0, 4000.0, 10000.0, 100000.0};
 }
 
 void MainWindow::uiInit()
 {
     styleSheetInit();
     ui->dateTimeEdit_end->setDateTime(QDateTime::currentDateTime());
-    ui->pushButton_showInfo->hide();
-    ui->pushButton_read->hide();
-    ui->pushButton_downLoad->hide();
-    ui->pushButton_analyzeWidgetShowHide->hide();
-
-    ui->line->hide();
-    ui->widget_plotSet->hide();
-    ui->line_2->hide();
-    ui->widget_function->hide();
-
-    this->setFixedSize(m_databaseWidgetWidth, m_height);
-    this->move((m_screenWidth - m_databaseWidgetWidth) / 2,
-               (m_screenHeight - m_height) / 2);
+    ui->comboBox_readType->setView(new QListView());
 }
 
 void MainWindow::styleSheetInit()
@@ -167,21 +139,19 @@ void MainWindow::plotInit()
 {
     m_oriDataPlot = new MultiCurvesPlot(1);
     m_oriDataPlot->setXAxisType(1);
-    m_oriDataPlot->setYAxis(-1.5, 1.5);
     m_oriDataPlot->setDataShowMode(1);    
     m_oriDataPlot->xAxis->setLabel("采样点数");
-    m_oriDataPlot->yAxis->setLabel("时差/ps");
     QGridLayout *layout_oriDataPlot = new QGridLayout;
     layout_oriDataPlot->setContentsMargins(0, 0, 0, 0);
     layout_oriDataPlot->addWidget(m_oriDataPlot, 0, Qt::AlignCenter);
     ui->widget_readDataPlot->setLayout(layout_oriDataPlot);
 
     m_calDataPlot = new MultiCurvesPlot(1);
+    m_calDataPlot->setCalDataPlotProperty();
     m_calDataPlot->setXAxisType(2);
     m_calDataPlot->setYAxisType(1);
-    m_calDataPlot->setYAxis(-1.5, 1.5);
+    m_calDataPlot->setCurveColor(0, 4);
     m_calDataPlot->xAxis->setLabel("时间间隔");
-    m_calDataPlot->yAxis->setLabel("TDEV");
     m_calDataPlot->xAxis->grid()->setSubGridVisible(true);
     m_calDataPlot->yAxis->grid()->setSubGridVisible(true);
     QGridLayout *layout_calDataPlot = new QGridLayout;
@@ -238,47 +208,8 @@ void MainWindow::on_pushButton_query_clicked()
                             .arg(startTimeStr).arg(endTimeStr);
 
     m_pModel->setSql(cmdStr);
-    m_selectDeviceDataFlag = false;
-    updateLogInfo(QString("查询%1").arg(m_pModel->queryData()));
-    ui->pushButton_showInfo->show();
-    ui->pushButton_read->hide();
-    ui->pushButton_downLoad->hide();
-    ui->pushButton_analyzeWidgetShowHide->hide();
-    on_pushButton_firstPage_clicked();
-}
-
-/**
- *   @brief     查看本次测试站点信息
- *   @author    hongweiYang
- *   @date      2022-09-05
- */
-void MainWindow::on_pushButton_showInfo_clicked()
-{
-    int row = m_pTableView->currentIndex().row();
-    if(row < 0)
-    {
-        QMessageBox::warning(this, "错误！", "未选择查询对象！请用鼠标点击选中查询对象！");
-        return;
-    }
-    else
-    {
-        QAbstractItemModel *model = m_pTableView->model();
-        QModelIndex index;
-        index = model->index(row, 2);//导出数据文件名称
-        m_selectDeviceInfoTableName = model->data(index).toString();
-    }
-
-    QString cmdStr = QString("SELECT DeviceId, DeviceType, DeviceIp, DataTableName FROM %1")
-                            .arg(m_selectDeviceInfoTableName);
     m_selectDeviceDataStr = cmdStr;
-    m_selectDeviceDataFlag = true;
-
-    m_pModel->setSql(cmdStr);
-    updateLogInfo(QString("查看设备信息%1").arg(m_pModel->queryData()));
-    ui->pushButton_showInfo->hide();
-    ui->pushButton_read->show();
-    ui->pushButton_downLoad->show();
-    ui->pushButton_analyzeWidgetShowHide->hide();
+    updateLogInfo(QString("查询%1").arg(m_pModel->queryData()));
     on_pushButton_firstPage_clicked();
 }
 
@@ -299,50 +230,34 @@ void MainWindow::on_pushButton_read_clicked()
     {
         QAbstractItemModel *model = m_pTableView->model();
         QModelIndex index;
-        index = model->index(row, 0);   //选中行设备ID
-        m_selectDeviceId = model->data(index).toUInt();
-        index = model->index(row, 1);   //选中行设备类型
-        m_selectDeviceType = model->data(index).toUInt();
-        index = model->index(row, 2);   //选中行设备IP
-        m_selectDeviceIp = model->data(index).toString();
-        index = model->index(row, 3);   //选中行设备数据表名称
+        index = model->index(row, 2);   //选中行设备数据表名称
         m_selectDataTableName = model->data(index).toString();
     }
 
     m_dateTimeStr.clear();
     m_dateTimes.clear();
     m_dataKeys.clear();
-    m_timeDiffs.clear();
+    m_readDatas.clear();
 
     QString cmdStr;
-//    cmdStr = QString("SELECT COUNT(*) FROM %1").arg(m_selectDataTableName);
-//    m_pModel->setSql(cmdStr);
-//    int dataLen = 0;
-//    if(m_pModel->getDataLen(dataLen))
-//    {
-//        m_dateTimes.resize(dataLen);
-//        m_dataKeys.resize(dataLen);
-//        m_timeDiffs.resize(dataLen);
-//    }
-
-    cmdStr = QString("SELECT * FROM %1").arg(m_selectDataTableName);
+    cmdStr = QString("SELECT SerialNum, DateTime, %1 FROM %2").arg(getDataType(ui->comboBox_readType->currentIndex())).arg(m_selectDataTableName);
     m_pModel->setSql(cmdStr);
-    if(m_pModel->selectData(m_dateTimeStr, m_dateTimes, m_dataKeys, m_timeDiffs))
+    if(m_pModel->selectData(m_dateTimeStr, m_dateTimes, m_dataKeys, m_readDatas))
     {
         m_dataStartTime = m_dateTimeStr.first();
         m_dataEndTime = m_dateTimeStr.last();
         ui->dateTimeEdit_plotStart->setDateTime(QDateTime::fromString(m_dataStartTime, Qt::ISODate));
         ui->dateTimeEdit_plotEnd->setDateTime(QDateTime::fromString(m_dataEndTime, Qt::ISODate));
-        ui->spinBox_stopPoint->setValue(m_timeDiffs.size());
+        ui->spinBox_stopPoint->setValue(m_readDatas.size());
         m_startPoint = 0;
-        m_stopPoint = m_timeDiffs.size()-1;
-        updateLogInfo(QString("数据表%1 数据读取成功！").arg(m_selectDataTableName));
+        m_stopPoint = m_readDatas.size()-1;
+        updateLogInfo(QString("数据表%1 数据%2 读取成功！").arg(m_selectDataTableName).arg(ui->comboBox_readType->currentText()));
         initDataPlotTable();
         updateReadDataPlot();
     }
     else
     {
-        updateLogInfo(QString("数据表%1 数据读取失败！").arg(m_selectDataTableName));
+        updateLogInfo(QString("数据表%1 数据%2 读取失败！").arg(m_selectDataTableName).arg(ui->comboBox_readType->currentText()));
     }
 }
 
@@ -370,60 +285,28 @@ void MainWindow::on_pushButton_downLoad_clicked()
     {
         QAbstractItemModel *model = m_pTableView->model();
         QModelIndex index;
-        index = model->index(row, 0);   //选中行设备ID
-        m_selectDeviceId = model->data(index).toUInt();
-        index = model->index(row, 1);   //选中行设备类型
-        m_selectDeviceType = model->data(index).toUInt();
-        index = model->index(row, 2);   //选中行设备IP
-        m_selectDeviceIp = model->data(index).toString();
-        index = model->index(row, 3);   //选中行设备数据表名称
+        index = model->index(row, 2);   //选中行设备数据表名称
         m_selectDataTableName = model->data(index).toString();
     }
 
     m_dateTimeStr.clear();
     m_dateTimes.clear();
     m_dataKeys.clear();
-    m_timeDiffs.clear();
+    m_readDatas.clear();
 
     QString cmdStr;
-//    cmdStr = QString("SELECT COUNT(*) FROM %1").arg(m_selectDataTableName);
-//    m_pModel->setSql(cmdStr);
-//    int dataLen = 0;
-//    if(m_pModel->getDataLen(dataLen))
-//    {
-//        m_dateTimes.resize(dataLen);
-//        m_dataKeys.resize(dataLen);
-//        m_timeDiffs.resize(dataLen);
-//    }
 
     cmdStr = QString("SELECT * FROM %1").arg(m_selectDataTableName);
     m_pModel->setSql(cmdStr);
-    if(m_pModel->selectData(m_dateTimeStr, m_dateTimes, m_dataKeys, m_timeDiffs))
+    if(m_pModel->downloadData(dstFilePath, m_selectDataTableName))
     {
-        updateLogInfo(QString("数据表%1 数据读取成功！").arg(m_selectDataTableName));
-
-        QString downDataFileName = QString("%1/Link(%2)_DeviceType(%3)_DeviceId(%4)_IP(%5)_Time(%6).txt")
-                                          .arg(dstFilePath)
-                                          .arg(m_selectLinkId).arg(m_selectDeviceType).arg(m_selectDeviceId)
-                                          .arg(m_selectDeviceIp).arg(m_selectDataTableName.mid(m_selectDataTableName.size()-14, 14));
-        QFile downFile(downDataFileName);
-        if(!downFile.open(QFile::WriteOnly | QFile::Text))
-        {
-            qDebug()<<downFile.errorString();
-            QMessageBox::information(this, "警告", "数据导出文件打开失败");
-            return;
-        }
-        QTextStream out(&downFile);
-        for(int i=0; i<m_timeDiffs.length(); i++)
-        {
-            out << m_dataKeys.at(i) << "\t" << m_dateTimeStr.at(i) << "\t" << m_timeDiffs.at(i) << "\n";
-        }
-        downFile.close();
-        updateLogInfo("数据导出成功");
+        updateLogInfo(QString("数据表%1 数据导出成功！").arg(m_selectDataTableName));
+        QMessageBox::information(this, "成功", "数据导出成功!");
     }
     else
     {
-        updateLogInfo(QString("数据表%1 数据读取失败！").arg(m_selectDataTableName));
+        updateLogInfo(QString("数据表%1 数据导出失败！").arg(m_selectDataTableName));
+        QMessageBox::warning(this, "失败", "数据导出失败!");
     }
 }
 
@@ -434,14 +317,21 @@ void MainWindow::on_pushButton_downLoad_clicked()
  */
 void MainWindow::updateReadDataPlot()
 {
-    m_tdevFirstFlag = true;
-    m_tdevValues.clear();
     m_calDataPlot->clearAllData();
+    m_calIndex.clear();
+    m_calValues.clear();
+    for(int i=0; i<CAL_INTERVAL_CNT; i++)
+    {
+        m_calDataTableModel->setData(m_calDataTableModel->index(i, 1), "");
+    }
+
     m_oriDataPlot->clearAllData();
+    m_oriDataPlot->yAxis->setLabel(getPlotYAxisName(ui->comboBox_readType->currentIndex()));
 
     m_oriDataPlot->setData(0, m_dateTimes.mid(m_startPoint, m_stopPoint-m_startPoint+1),
                            m_dataKeys.mid(m_startPoint, m_stopPoint-m_startPoint+1),
-                           m_timeDiffs.mid(m_startPoint, m_stopPoint-m_startPoint+1));
+                           m_readDatas.mid(m_startPoint, m_stopPoint-m_startPoint+1));
+    m_oriDataPlot->updateMyPlot();
 }
 
 /**
@@ -451,54 +341,61 @@ void MainWindow::updateReadDataPlot()
  */
 void MainWindow::initDataPlotTable()
 {
-    ui->pushButton_downLoad->show();
-    ui->pushButton_analyzeWidgetShowHide->setText("隐藏");
-    ui->pushButton_analyzeWidgetShowHide->show();
+    if(getPlotYAxisType(ui->comboBox_readType->currentIndex()) == ADEV)
+    {
+        ui->pushButton_adev->show();
+        ui->pushButton_tdev->hide();
 
-    ui->line->show();
-    ui->widget_plotSet->show();
-    ui->line_2->show();
-    ui->widget_function->show();
-    this->setFixedSize(m_width, m_height);
-    this->move((m_screenWidth - m_width) / 2, (m_screenHeight - m_height) / 2);
+        QStringList headList;
+        headList << QString("时间间隔") << QString("ADEV");
+        m_calDataTableModel->setHeadDataList(headList);
+    }
+    else if(getPlotYAxisType(ui->comboBox_readType->currentIndex()) == TDEV)
+    {
+        ui->pushButton_adev->hide();
+        ui->pushButton_tdev->show();
+
+        QStringList headList;
+        headList << QString("时间间隔") << QString("TDEV");
+        m_calDataTableModel->setHeadDataList(headList);
+    }
+    for(int i=0; i<CAL_INTERVAL_CNT; i++)
+    {
+        m_calDataTableModel->setData(m_calDataTableModel->index(i, 1), "");
+    }
 }
 
 void MainWindow::on_pushButton_firstPage_clicked()
 {
-    if(m_selectDeviceDataFlag)
-        m_pModel->setSql(m_selectDeviceDataStr);
+    m_pModel->setSql(m_selectDeviceDataStr);
     m_pModel->currentPageEdit(1);
     updateDataBaseTableStatus();
 }
 
 void MainWindow::on_pushButton_pageUp_clicked()
 {
-    if(m_selectDeviceDataFlag)
-        m_pModel->setSql(m_selectDeviceDataStr);
+    m_pModel->setSql(m_selectDeviceDataStr);
     m_pModel->currentPageEdit(m_pModel->getCurrentPage() - 1);
     updateDataBaseTableStatus();
 }
 
 void MainWindow::on_pushButton_pageDown_clicked()
 {
-    if(m_selectDeviceDataFlag)
-        m_pModel->setSql(m_selectDeviceDataStr);
+    m_pModel->setSql(m_selectDeviceDataStr);
     m_pModel->currentPageEdit(m_pModel->getCurrentPage() + 1);
     updateDataBaseTableStatus();
 }
 
 void MainWindow::on_pushButton_endPage_clicked()
 {
-    if(m_selectDeviceDataFlag)
-        m_pModel->setSql(m_selectDeviceDataStr);
+    m_pModel->setSql(m_selectDeviceDataStr);
     m_pModel->currentPageEdit(m_pModel->getTotalNumPage());
     updateDataBaseTableStatus();
 }
 
 void MainWindow::on_pushButton_toThePage_clicked()
 {
-    if(m_selectDeviceDataFlag)
-        m_pModel->setSql(m_selectDeviceDataStr);
+    m_pModel->setSql(m_selectDeviceDataStr);
     //得到输入字符串
     QString szText = ui->lineEdit_toThePageNum->text();
     //数字正则表达式
@@ -532,8 +429,7 @@ void MainWindow::on_pushButton_toThePage_clicked()
 
 void MainWindow::on_pushButton_rowCountsSet_clicked()
 {
-    if(m_selectDeviceDataFlag)
-        m_pModel->setSql(m_selectDeviceDataStr);
+    m_pModel->setSql(m_selectDeviceDataStr);
     //得到输入字符串
     QString szText = ui->lineEdit_everyPageRowCounts->text();
 
@@ -677,118 +573,185 @@ void MainWindow::updateLogInfo(QString info)
                                 .arg(info));
 }
 
-void MainWindow::on_pushButton_databaseShowHide_clicked()
+void MainWindow::on_pushButton_adev_clicked()
 {
-    if(ui->pushButton_databaseShowHide->text() == "隐藏")
+    m_calDataPlot->clearAllData();
+    m_calIndex.clear();
+    m_calValues.clear();
+    for(int i=0; i<CAL_INTERVAL_CNT; i++)
     {
-        ui->line_2->hide();
-        ui->widget_databaseWidget->hide();
-        ui->pushButton_databaseShowHide->setText("显示");
-        this->setFixedSize(m_analyzeWidgetWidth, m_height);
-        this->move((m_screenWidth - m_analyzeWidgetWidth) / 2,
-                   (m_screenHeight - m_height) / 2);
+        m_calDataTableModel->setData(m_calDataTableModel->index(i, 1), "");
     }
-    else
+
+    QVector<double> selectDataVct(m_stopPoint-m_startPoint+1);
+    selectDataVct = m_readDatas.mid(m_startPoint, m_stopPoint-m_startPoint+1);
+
+    calculateFreqAllan(selectDataVct);
+
+    updateCalDataPlot(ADEV);
+    updateCalDataTable();
+}
+
+void MainWindow::calculateFreqAllan(const QVector<double> &valueVct)
+{
+    if(valueVct.size() < 2)
     {
-        ui->line_2->show();
-        ui->widget_databaseWidget->show();
-        ui->pushButton_databaseShowHide->setText("隐藏");
-        this->setFixedSize(m_width, m_height);
-        this->move((m_screenWidth - m_width) / 2,
-                   (m_screenHeight - m_height) / 2);
+        return;
+    }
+
+    memset(m_allanData, 0, sizeof(FreqAllanStruct)*CAL_INTERVAL_CNT);
+
+    for(int i=0; i<valueVct.size(); i++)
+    {
+        double freq = valueVct.at(i);
+        for(int j=0; j<14; j++)
+        {
+            calculateTimeIntervalFreqAllan(freq, g_calKeys[j], j);
+        }
+    }
+
+    for(int i=0; i<CAL_INTERVAL_CNT; i++)
+    {
+        if(m_allanData[i].result == 0)
+            continue;
+        m_calIndex.append(g_calKeys[i]);
+        m_calValues.append(m_allanData[i].result);
+    }
+}
+
+void MainWindow::calculateTimeIntervalFreqAllan(const double freq, const int interval, const int allanDataIdx)
+{
+    FreqAllanStruct* pSt = (FreqAllanStruct *)(m_allanData+allanDataIdx);
+
+    if(pSt == NULL)
+    {
+        return;
+    }
+
+    pSt->dataCnt++;
+    pSt->freqSum += freq;
+    pSt->valueNum++;
+
+    if(pSt->dataCnt % interval == 0)
+    {
+        double freqAverage = pSt->freqSum / pSt->valueNum;
+        int freqCalNum = pSt->dataCnt / interval;
+        if(freqCalNum > 1)
+        {
+            double dSigma = qPow(freqAverage - pSt->freqAverage, 2);
+            pSt->sigmaSum += dSigma;
+
+            double dSigmaRes = pSt->sigmaSum / (double)( 2 * (freqCalNum - 1));
+            if(dSigmaRes != 0)
+            {
+                pSt->result = qSqrt(dSigmaRes);
+            }
+            else
+            {
+                pSt->result = 0.0;
+            }
+        }
+
+        pSt->freqAverage = freqAverage;
+        pSt->freqSum = 0.0;
+        pSt->valueNum = 0;
     }
 }
 
 void MainWindow::on_pushButton_tdev_clicked()
 {
-    QStringList headList;
-    headList << QString("时间间隔") << QString("TDEV");
-    m_calDataTableModel->setHeadDataList(headList);
-
     m_calDataPlot->clearAllData();
-
-    QVector<double> selectTimeDiffVct(m_stopPoint-m_startPoint+1);
-    selectTimeDiffVct = m_timeDiffs.mid(m_startPoint, m_stopPoint-m_startPoint+1);
-
-    if(m_tdevFirstFlag)
+    m_calIndex.clear();
+    m_calValues.clear();
+    for(int i=0; i<CAL_INTERVAL_CNT; i++)
     {
-        int N = selectTimeDiffVct.size();
-        for(int i=0; i<14; i++)
-        {
-            int n = m_tdevKeys[i];
-            if(n >= (int)(N/3))
-                continue;
-
-            double tdev_value = 0;
-
-            for(int j=0; j<(N-3*n+1); j++)
-            {
-                double tmp_value = 0;
-                for(int i=j; i<=n+j-1; i++)
-                {
-                    double tmp = selectTimeDiffVct.at(i+2*n)/1000000000000.0 - 2*selectTimeDiffVct.at(i+n)/1000000000000.0 + selectTimeDiffVct.at(i)/1000000000000.0;
-                    tmp_value += tmp;
-                }
-                tdev_value += qPow(tmp_value, 2);
-            }
-            tdev_value = qSqrt(tdev_value/(6.0*n*n*(N-3.0*n+1)));
-            m_tdevValues.append(tdev_value);
-        }
-        m_tdevFirstFlag = false;
+        m_calDataTableModel->setData(m_calDataTableModel->index(i, 1), "");
     }
+
+    QVector<double> selectDataVct(m_stopPoint-m_startPoint+1);
+    selectDataVct = m_readDatas.mid(m_startPoint, m_stopPoint-m_startPoint+1);
+
+    calculateTdev(selectDataVct);
+
     updateCalDataPlot(TDEV);
-    updateCalDataTable(TDEV);
+    updateCalDataTable();
+}
+
+void MainWindow::calculateTdev(const QVector<double>& values)
+{
+    memset(m_tdevData, 0, sizeof(TdevStruct)*CAL_INTERVAL_CNT);
+
+    QVector<double> valueVct;
+    valueVct.reserve(300000);
+
+    for(int i=0; i<values.size(); i++)
+    {
+        if(valueVct.size() == 300000)
+            valueVct.removeFirst();
+        valueVct.append(values.at(i)/1000.0);
+
+        int dataSize = valueVct.size();
+
+        for(int j=0; j<CAL_INTERVAL_CNT; j++)
+        {
+            if(dataSize/3 >= g_calKeys[j])
+            {
+                calculateTimeIntervalTdev(valueVct.mid(dataSize-(3*g_calKeys[j]), 3*g_calKeys[j]), g_calKeys[j], j);
+            }
+        }
+    }
+
+    for(int i=0; i<CAL_INTERVAL_CNT; i++)
+    {
+        if(m_tdevData[i].result == 0)
+            continue;
+        m_calIndex.append(g_calKeys[i]);
+        m_calValues.append(m_tdevData[i].result);
+    }
+}
+
+void MainWindow::calculateTimeIntervalTdev(const QVector<double> &values, const int interval, const int tdevDataIdx)
+{
+    TdevStruct *pSt = (TdevStruct *)(m_tdevData+tdevDataIdx);
+    if(pSt == NULL)
+    {
+        return;
+    }
+
+    double tmp_value = 0;
+    for(int i=0; i<interval; i++)
+    {
+        double tmp = values.at(i+2*interval)/1000000000.0 - 2*values.at(i+interval)/1000000000.0 + values.at(i)/1000000000.0;
+        tmp_value += tmp;
+    }
+    pSt->tdevValue += qPow(tmp_value, 2);
+    pSt->valueNum += 1;
+    pSt->result = qSqrt(pSt->tdevValue/(6.0*interval*interval*(pSt->valueNum)));
 }
 
 void MainWindow::updateCalDataPlot(int type)
 {
-    if(type == TDEV)
-    {
-        QVector<double> times;
-        m_calDataPlot->setData(0, times, m_tdevKeys.mid(0, m_tdevValues.size()), m_tdevValues);
-    }
+    if(type == ADEV)
+        m_calDataPlot->yAxis->setLabel("ADEV");
+    else if(type == TDEV)
+        m_calDataPlot->yAxis->setLabel("TDEV");
+
+    QVector<double> times;
+    m_calDataPlot->setData(0, times, m_calIndex, m_calValues);
+    m_calDataPlot->updateMyPlot();
 }
 
-void MainWindow::updateCalDataTable(int type)
+void MainWindow::updateCalDataTable()
 {
-    if(type == TDEV)
+    for(int i=0; i<m_calValues.size(); i++)
     {
-        for(int i=0; i<m_tdevValues.size(); i++)
-        {
-            m_calDataTableModel->setData(m_calDataTableModel->index(i, 1), QString::number(m_tdevValues.at(i)));
-        }
-    }
-}
-
-void MainWindow::on_pushButton_analyzeWidgetShowHide_clicked()
-{
-    if(ui->pushButton_analyzeWidgetShowHide->text() == "隐藏")
-    {       
-        ui->line->hide();
-        ui->widget_plotSet->hide();
-        ui->line_2->hide();
-        ui->widget_function->hide();
-        ui->pushButton_analyzeWidgetShowHide->setText("显示");
-        this->setFixedSize(m_databaseWidgetWidth, m_height);
-        this->move((m_screenWidth - m_databaseWidgetWidth) / 2,
-                   (m_screenHeight - m_height) / 2);
-    }
-    else
-    {       
-        ui->line->show();
-        ui->widget_plotSet->show();
-        ui->line_2->show();
-        ui->widget_function->show();
-        ui->pushButton_analyzeWidgetShowHide->setText("隐藏");
-        this->setFixedSize(m_width, m_height);
-        this->move((m_screenWidth - m_width) / 2,
-                   (m_screenHeight - m_height) / 2);
+        m_calDataTableModel->setData(m_calDataTableModel->index(i, 1), QString::number(m_calValues.at(i), 'e', 2));
     }
 }
 
 void MainWindow::on_pushButton_showAll_clicked()
 {
-    m_oriDataPlot->setPause(false);
+    m_oriDataPlot->setShowPause(false);
 }
 
 void MainWindow::on_pushButton_clear_clicked()
@@ -796,22 +759,17 @@ void MainWindow::on_pushButton_clear_clicked()
     m_oriDataPlot->clearAllData();
 }
 
-/**
- *   @brief     X轴类型切换
- *   @author    hongweiYang
- *   @date      2022-11-05
- */
 void MainWindow::on_pushButton_xAxisType_clicked()
 {
     if(ui->pushButton_xAxisType->text() == "时间")
     {
         ui->pushButton_xAxisType->setText("点数");
-        m_oriDataPlot->setXAxisType(0);
+        m_oriDataPlot->setXAxisShowMode(0);
     }
     else
     {
         ui->pushButton_xAxisType->setText("时间");
-        m_oriDataPlot->setXAxisType(1);
+        m_oriDataPlot->setXAxisShowMode(1);
     }
 }
 
@@ -834,7 +792,7 @@ void MainWindow::on_pushButton_plot_clicked()
         QDateTime startDateTime = ui->dateTimeEdit_plotStart->dateTime();
         QDateTime endDateTime = ui->dateTimeEdit_plotEnd->dateTime();
 
-        for(int i=0; i<m_timeDiffs.size(); i++)
+        for(int i=0; i<m_readDatas.size(); i++)
         {
             QDateTime curDateTime = QDateTime::fromString(m_dateTimeStr.at(i), DATETIMEFORMAT);
             if((curDateTime >= startDateTime) && !startFlag)
@@ -853,7 +811,7 @@ void MainWindow::on_pushButton_plot_clicked()
     else if(ui->checkBox_point->isChecked())
     {
         if(ui->spinBox_startPoint->value() > ui->spinBox_stopPoint->value() ||
-           ui->spinBox_stopPoint->value() > m_timeDiffs.size())
+           ui->spinBox_stopPoint->value() > m_readDatas.size())
         {
             QMessageBox::warning(nullptr, "错误!", "点数范围选取异常,请重新选择!");
             return;
@@ -871,6 +829,78 @@ void MainWindow::on_pushButton_plot_clicked()
 void MainWindow::on_pushButton_resetTimeRange_clicked()
 {
     m_startPoint = 0;
-    m_stopPoint = m_timeDiffs.size()-1;
+    m_stopPoint = m_readDatas.size()-1;
     updateReadDataPlot();
+}
+
+QString MainWindow::getDataType(int index)
+{
+    switch (index) {
+    case 0:
+        return "phaseA";
+    case 1:
+        return "phaseB";
+    case 2:
+        return "phaseC";
+    case 3:
+        return "phaseD";
+    case 4:
+        return "freqA";
+    case 5:
+        return "freqB";
+    case 6:
+        return "freqC";
+    case 7:
+        return "freqD";
+    case 8:
+        return "clockFreq";
+    case 9:
+        return "signalFreq";
+    case 10:
+        return "signalPhase";
+    default:
+        return "phaseA";
+    }
+}
+
+QString MainWindow::getPlotYAxisName(int index)
+{
+    switch (index) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+        return "相差/ps";
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        return "频率准确度";
+    default:
+        break;
+    }
+}
+
+int MainWindow::getPlotYAxisType(int index)
+{
+    switch (index) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 10:
+        return TDEV;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        return ADEV;
+    default:
+        break;
+    }
 }

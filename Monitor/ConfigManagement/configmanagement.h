@@ -9,7 +9,7 @@ class ConfigManagement : public QObject
 
 public:
     static ConfigManagement *getInstance();
-    ~ConfigManagement();
+    static void deleteInstance();
 
     void setDatabaseIp(QString ip);
     QString getDatabaseIp();
@@ -25,6 +25,7 @@ public:
 
 private:
     explicit ConfigManagement(QObject *parent = nullptr);
+    ~ConfigManagement();
 
     void mainInit();
     void connectSignalSlot();

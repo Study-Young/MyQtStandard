@@ -5,6 +5,7 @@
 #include <QSqlDatabase>
 #include <QPoint>
 #include <QThread>
+#include <QFile>
 
 class DataBaseTableModel : public QSqlQueryModel
 {
@@ -19,7 +20,8 @@ public:
     //执行查询语句--是否重新拼接sql语句
     QString queryData();
     //执行查询语句
-    bool selectData(QStringList &dateTimeStr, QVector<double> &dateTimes, QVector<double> &dataKeys, QVector<double> &timeDiffs);
+    bool selectData(QStringList &dateTimeStr, QVector<double> &dateTimes, QVector<double> &dataKeys, QVector<double> &readDatas);
+    bool downloadData(QString filePath, QString tableName);
     bool getDataLen(int &len);
 
     //设置过滤条件

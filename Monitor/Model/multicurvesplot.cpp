@@ -1,16 +1,22 @@
 ﻿#include "multicurvesplot.h"
 
-MultiCurvesPlot::MultiCurvesPlot(int curvesCnt, QWidget *parent):
-    allCurvesData(curvesCnt),
+MultiCurvesPlot::MultiCurvesPlot(int _curvesCnt, QWidget *parent):
+    allCurvesData(_curvesCnt),
     QCustomPlot(parent)
 {
     mainInit();
     connectSignalsSlots();
 }
 
-MultiCurvesPlot::~MultiCurvesPlot()
+void MultiCurvesPlot::mainInit()
 {
+    memberValueInit();
+    uiInit();
+}
 
+void MultiCurvesPlot::connectSignalsSlots()
+{
+    connect(this->selectionRect(), &QCPSelectionRect::accepted, this, &MultiCurvesPlot::slotRect);
 }
 
 void MultiCurvesPlot::mouseReleaseEvent(QMouseEvent *event)
@@ -45,40 +51,22 @@ void MultiCurvesPlot::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void MultiCurvesPlot::mainInit()
-{
-    memberValueInit();
-    uiInit();
-}
-
-void MultiCurvesPlot::connectSignalsSlots()
-{
-    connect(this->selectionRect(), &QCPSelectionRect::accepted, this, &MultiCurvesPlot::slotRect);
-}
-
 void MultiCurvesPlot::memberValueInit()
 {
-    curvesCnt = allCurvesData.size();
+    m_curvesCnt = allCurvesData.size();
     updateTimes = 0;
+
     slotRectFlag = false;
     pauseFlag = false;
-    dataShowMode = 0;
-    startTime = QDateTime::currentSecsSinceEpoch();
+    dataShowMode = 0; 
+    m_startTime = QDateTime::currentSecsSinceEpoch();
 
     contextMenuInit();
     curvesDataInit();
 }
 
-void MultiCurvesPlot::uiInit()
-{
-    setMyStyleSheet();
-    paintAttributeInit();
-//    legendInit();
-}
-
 void MultiCurvesPlot::contextMenuInit()
 {
-    this->setSelectionRectMode(QCP::srmZoom);
     //右键菜单
     this->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -105,6 +93,7 @@ void MultiCurvesPlot::contextMenuInit()
 
     m_pActionClear = new QAction("清除曲线");
     connect(m_pActionClear, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
+
     this->addAction(m_pActionShowAll);
     this->addAction(m_pActionPause);
     this->addAction(m_pTimeMode);
@@ -113,13 +102,12 @@ void MultiCurvesPlot::contextMenuInit()
 
 void MultiCurvesPlot::curvesDataInit()
 {
-    graphColorVct.resize(colorListStr.size());
-    for(int i = 0; i < colorListStr.size();i++)
+    getColor.resize(m_curvesCnt);
+    for(int i = 0; i < getColor.size();i++)
     {
-        graphColorVct[i] = QColor(colorListStr.at(i));
+        getColor[i] = QColor(colorListStr.at(i));
     }
-
-    getName.resize(curvesCnt);
+    getName.resize(m_curvesCnt);
     for(int i = 0; i < getName.size();i++)//设置默认曲线名称
     {
         getName[i] = QString("通道 %1").arg(i+1);
@@ -133,28 +121,59 @@ void MultiCurvesPlot::curvesDataInit()
     }
 }
 
+void MultiCurvesPlot::uiInit()
+{
+    setMyStyleSheet();
+    paintAttributeInit();
+//    legendInit();
+}
+
 void MultiCurvesPlot::setMyStyleSheet()
 {
-    this->setBackground(QColor(0, 32, 96));
+    QColor backgroundColor = QColor(0, 32, 96);     //QColor(255, 255, 255)
+    QColor axisColor = QColor(128, 255, 255);       //QColor(0, 0, 0)
+    QColor gridColor = QColor(0, 70, 220);//QColor(200, 255, 255);       //QColor(200, 200, 200)
 
-    this->xAxis->setBasePen(QPen(QColor(102, 255, 255), 1));        // 轴线的画笔
-    this->xAxis->setTickPen(QPen(QColor(102, 255, 255), 1));        // 轴刻度线的画笔
-    this->xAxis->setSubTickPen(QPen(QColor(102, 255, 255), 1));     // 轴子刻度线的画笔
-    this->xAxis->setTickLabelColor(QColor(102, 255, 255));          // 轴刻度文字颜色
-    this->xAxis->setLabelColor(QColor(102, 255, 255));
+    this->setBackground(backgroundColor);
+
+    this->xAxis->setBasePen(QPen(axisColor, 1));        // 轴线的画笔
+    this->xAxis->setTickPen(QPen(axisColor, 1));        // 轴刻度线的画笔
+    this->xAxis->setSubTickPen(QPen(axisColor, 1));     // 轴子刻度线的画笔
+    this->xAxis->setTickLabelColor(axisColor);          // 轴刻度文字颜色
+    this->xAxis->setLabelColor(axisColor);
     this->xAxis->setTickLengthIn(3);
     this->xAxis->setTickLengthOut(5);
 
-    this->yAxis->setBasePen(QPen(QColor(102, 255, 255), 1));        // 轴线的画笔
-    this->yAxis->setTickPen(QPen(QColor(102, 255, 255), 1));        // 轴刻度线的画笔
-    this->yAxis->setSubTickPen(QPen(QColor(102, 255, 255), 1));     // 轴子刻度线的画笔
-    this->yAxis->setTickLabelColor(QColor(102, 255, 255));          // 轴刻度文字颜色
-    this->yAxis->setLabelColor(QColor(102, 255, 255));
+    this->yAxis->setBasePen(QPen(axisColor, 1));        // 轴线的画笔
+    this->yAxis->setTickPen(QPen(axisColor, 1));        // 轴刻度线的画笔
+    this->yAxis->setSubTickPen(QPen(axisColor, 1));     // 轴子刻度线的画笔
+    this->yAxis->setTickLabelColor(axisColor);          // 轴刻度文字颜色
+    this->yAxis->setLabelColor(axisColor);
 
-    this->xAxis->grid()->setPen(QPen(QColor(183, 255, 255), 1, Qt::DashLine));
-    this->yAxis->grid()->setPen(QPen(QColor(183, 255, 255), 1, Qt::DashLine));
-    this->xAxis->grid()->setZeroLinePen(QPen(QColor(183, 255, 255)));
-    this->yAxis->grid()->setZeroLinePen(QPen(QColor(183, 255, 255)));
+    this->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    this->yAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    this->xAxis->grid()->setSubGridPen(QPen(gridColor, 1, Qt::DotLine));
+    this->yAxis->grid()->setSubGridPen(QPen(gridColor, 1, Qt::DotLine));
+    this->xAxis->grid()->setZeroLinePen(QPen(gridColor));
+    this->yAxis->grid()->setZeroLinePen(QPen(gridColor));
+
+    QFont font;
+
+    font = this->xAxis->tickLabelFont();
+    font.setPointSize(11);
+    this->xAxis->setTickLabelFont(font);
+
+    font = this->yAxis->tickLabelFont();
+    font.setPointSize(12);
+    this->yAxis->setTickLabelFont(font);
+
+//    font = this->xAxis->labelFont();
+//    font.setPointSize(13);
+//    this->xAxis->setLabelFont(font);
+
+//    font = this->yAxis->labelFont();
+//    font.setPointSize(13);
+//    this->yAxis->setLabelFont(font);
 
     this->setStyleSheet("QMenu {\
                              background-color: rgb(10, 40, 70);\
@@ -175,9 +194,9 @@ void MultiCurvesPlot::setMyStyleSheet()
 
 void MultiCurvesPlot::paintAttributeInit()
 {
-    this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); //可平移 可滚轮缩放
-    this->setNoAntialiasingOnDrag(true);//禁用抗锯齿，以提高性能
     this->setSelectionRectMode(QCP::srmZoom);
+    this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); //可平移
+    this->setNoAntialiasingOnDrag(true);//禁用抗锯齿，以提高性能
 }
 
 void MultiCurvesPlot::showCurves(QList<uint16_t> idxList)
@@ -190,7 +209,7 @@ void MultiCurvesPlot::showCurves(QList<uint16_t> idxList)
     for(QList<uint16_t>::const_iterator it = idxList.begin(); it != idxList.end(); it++)
     {   //*it为每一个要显示的曲线编号
         uint16_t curveIdx = *it;
-        if(curveIdx > curvesCnt)
+        if(curveIdx > m_curvesCnt)
         {
             continue;
         }
@@ -198,7 +217,7 @@ void MultiCurvesPlot::showCurves(QList<uint16_t> idxList)
         this->addGraph(this->xAxis, this->yAxis);
         QCPGraph* pGraph = graph(graphIdx);
         curveIdx2graphPtr[curveIdx] = pGraph;//记录：曲线索引->graph指针的映射
-        pGraph->setPen(QPen(colorListStr[curveIdx]));//线的颜色随机
+        pGraph->setPen(QPen(getColor[curveIdx]));//线的颜色随机
         pGraph->setLineStyle(QCPGraph::lsLine);//阶梯线样式
         this->graph(graphIdx)->setName(getName[curveIdx]);
         graphIdx++;
@@ -217,6 +236,22 @@ void MultiCurvesPlot::setDataShowMode(int mode)
     dataShowMode = mode;
 }
 
+void MultiCurvesPlot::setShowPause(bool pause)
+{
+    if(pause)
+        m_pActionPause->trigger();
+    else
+        m_pActionContinue->trigger();
+}
+
+void MultiCurvesPlot::setXAxisShowMode(int mode)
+{
+    if(mode == 0)
+        m_pTimeMode->trigger();
+    else if(mode == 1)
+        m_pPointNumMode->trigger();
+}
+
 void  MultiCurvesPlot::setXAxisRange(double range)
 {
     xAxisShowRange =  range;//设置X轴的范围
@@ -232,7 +267,7 @@ void MultiCurvesPlot::setXAxisType(int type)
         this->xAxis->setTicker(dateTicker);//设置X轴为时间轴
         this->xAxis->setLabel("时间");
 
-        for(int i=0; i<curvesCnt; i++)
+        for(int i=0; i<m_curvesCnt; i++)
         {
             if(!allCurvesData[i].valVec.isEmpty())
             {
@@ -250,7 +285,7 @@ void MultiCurvesPlot::setXAxisType(int type)
         this->xAxis->setRange(0, xAxisShowRange);
         this->xAxis->setLabel("采样点数");
 
-        for(int i=0; i<curvesCnt; i++)
+        for(int i=0; i<m_curvesCnt; i++)
         {
             if(!allCurvesData[i].valVec.isEmpty())
             {
@@ -268,6 +303,8 @@ void MultiCurvesPlot::setXAxisType(int type)
         this->xAxis->setScaleType(QCPAxis::stLogarithmic);
         this->xAxis->setRange(1,100000);
     }
+
+    this->replot();
 }
 
 void MultiCurvesPlot::setYAxisRange(double lower, double upper)
@@ -304,7 +341,7 @@ void MultiCurvesPlot::setPause(bool enable)
 
 void MultiCurvesPlot::setUpdateTimes(int cnt)
 {
-    updateTimes = cnt;
+    updateTimes = cnt;        
 }
 
 int MultiCurvesPlot::getUpdateTimes()
@@ -312,24 +349,20 @@ int MultiCurvesPlot::getUpdateTimes()
     return updateTimes;
 }
 
-void MultiCurvesPlot::setStartTime(QDateTime startDateTime)
+void MultiCurvesPlot::setStartTime(QDateTime startTime)
 {
-    startTime = startDateTime.toSecsSinceEpoch();
+    m_startTime = startTime.toSecsSinceEpoch();
 }
 
-void MultiCurvesPlot::setCurveColor(int idx, int color)
+void MultiCurvesPlot::setCalDataPlotProperty()
 {
-    this->graph(idx)->setPen(QPen(graphColorVct[color]));//线的颜色随机
+    this->setContextMenuPolicy(Qt::NoContextMenu);
+    this->setSelectionRectMode(QCP::srmNone);
+    this->setInteractions(QCP::iNone);
 }
 
-void MultiCurvesPlot::addData(int idx, double time, double cnt, double value)
+void MultiCurvesPlot::addData(const int idx, double time, double cnt, double value)
 {
-    if(idx > curvesCnt)
-        return;
-
-//    if(y > 1e10 || y < -1e10)//接收到的异常值直接不绘制
-//        return;
-
     allCurvesData[idx].timeKeyVec.append(time);//备份数据源
     allCurvesData[idx].cntKeyVec.append(cnt);//备份数据源
     allCurvesData[idx].valVec.append(value);
@@ -344,11 +377,8 @@ void MultiCurvesPlot::addData(int idx, double time, double cnt, double value)
     }
 }
 
-void MultiCurvesPlot::addData(int idx, const QVector<double> &times, const QVector<double> &cnts, const QVector<double> &values)
+void MultiCurvesPlot::addData(const int idx, const QVector<double> &times, const QVector<double> &cnts, const QVector<double> &values)
 {
-    if(idx > curvesCnt)
-        return;
-
     allCurvesData[idx].timeKeyVec.append(times);//备份数据源
     allCurvesData[idx].cntKeyVec.append(cnts);//备份数据源
     allCurvesData[idx].valVec.append(values);
@@ -358,21 +388,14 @@ void MultiCurvesPlot::addData(int idx, const QVector<double> &times, const QVect
         QCPGraph* pGraph = curveIdx2graphPtr[idx];
 
         if(xAxisType == 0)
-        {
             pGraph->addData(times, values);
-        }
         else
-        {
             pGraph->addData(cnts, values);
-        }
     }
 }
 
 void MultiCurvesPlot::setData(const int idx, const QVector<double> &times, const QVector<double> &cnts, const QVector<double> &values)
-{
-    if(idx > curvesCnt)
-        return;
-
+{   
     allCurvesData[idx].timeKeyVec.clear();
     allCurvesData[idx].cntKeyVec.clear();
     allCurvesData[idx].valVec.clear();
@@ -401,23 +424,7 @@ void MultiCurvesPlot::setData(const int idx, const QVector<double> &times, const
 
 void MultiCurvesPlot::clearAllData()
 {
-    for(int i = 0; i < graphCount(); i++)
-    {
-        graph(i)->data().data()->clear();
-    }
-
-    for(int idx = 0; idx < allCurvesData.size(); idx++)
-    {
-        allCurvesData[idx].timeKeyVec.clear();
-        allCurvesData[idx].cntKeyVec.clear();
-        allCurvesData[idx].valVec.clear();
-    }
-
-    m_listZoomLevel.clear();
-
-    updateTimes = 0;
-
-    updateMyPlot();
+    m_pActionClear->trigger();
 }
 
 void MultiCurvesPlot::clearIndexData(const int idx)
@@ -446,7 +453,7 @@ void MultiCurvesPlot::updateMyPlot()
                     }
                     else
                     {
-                        this->xAxis->setRange(startTime, startTime + xAxisShowRange);
+                        this->xAxis->setRange(m_startTime, m_startTime + xAxisShowRange);
                     }
                 }
                 else if(xAxisType == 1)
@@ -464,11 +471,15 @@ void MultiCurvesPlot::updateMyPlot()
                 {
                     this->xAxis->setRange(1, 100000);
                 }
+                else if(xAxisType == 3)
+                {
+                    ;
+                }
 
                 if(yAxisAuto)
                 {
-//                    graph(0)->rescaleValueAxis(false, true);
-                    this->yAxis->rescale(true);
+                    graph(0)->rescaleValueAxis(false, true);
+//                    this->yAxis->rescale(true);
                 }
                 break;
             }
@@ -479,9 +490,8 @@ void MultiCurvesPlot::updateMyPlot()
                 break;
             default:
                 break;
-        }
-    }
-
+        }       
+    }    
     this->replot();
 }
 
@@ -499,7 +509,6 @@ void MultiCurvesPlot::restoreBeforePlot()
             {
                 this->yAxis->setRange(m_listZoomLevel.at(1).dYLower, m_listZoomLevel.at(1).dYUpper);
             }
-//            qDebug()<<__FUNCTION__<<m_listZoomLevel.at(1).dXLower<<m_listZoomLevel.at(1).dXUpper<<m_listZoomLevel.at(1).dYLower<<m_listZoomLevel.at(1).dYUpper;
             m_listZoomLevel.removeAt(0);
         }
         this->replot();
@@ -526,52 +535,79 @@ void MultiCurvesPlot::slotContexMenu()
     }
     else if(pAction == m_pActionShowAll)
     {
-        QAction *lastAction = this->actions().at(1);
-        this->removeAction(pAction);
-        this->insertAction(lastAction, m_pActionShowPart);
+        if(this->actions().contains(m_pActionShowAll))
+        {
+            this->insertAction(m_pActionShowAll, m_pActionShowPart);
+            this->removeAction(m_pActionShowAll);
+        }
         setDataShowMode(1);
     }
     else if(pAction == m_pActionShowPart)
     {
-        QAction *lastAction = this->actions().at(1);
-        this->removeAction(pAction);
-        this->insertAction(lastAction, m_pActionShowAll);
+        if(this->actions().contains(m_pActionShowPart))
+        {
+            this->insertAction(m_pActionShowPart, m_pActionShowAll);
+            this->removeAction(m_pActionShowPart);
+        }
         setDataShowMode(0);
     }
     else if(pAction == m_pActionPause)
     {
-        QAction *lastAction = this->actions().at(2);
-        this->removeAction(pAction);
-        this->insertAction(lastAction, m_pActionContinue);
+        if(this->actions().contains(m_pActionPause))
+        {
+            this->insertAction(m_pActionPause, m_pActionContinue);
+            this->removeAction(m_pActionPause);
+        }
         emit updatePauseStaSignal(true);
         setPause(true);
     }
     else if(pAction == m_pActionContinue)
     {
         m_listZoomLevel.clear();
-        this->removeAction(pAction);
         if(this->actions().contains(m_pActionRestoreBefore))
+        {
             this->removeAction(m_pActionRestoreBefore);
-        QAction *lastAction = this->actions().at(1);
-        this->insertAction(lastAction, m_pActionPause);
+        }
+        if(this->actions().contains(m_pActionContinue))
+        {
+            this->insertAction(m_pActionContinue, m_pActionPause);
+            this->removeAction(m_pActionContinue);
+        }
         emit updatePauseStaSignal(false);
         setPause(false);
     }
     else if(pAction == m_pTimeMode)
     {
-        this->removeAction(pAction);
-        this->insertAction(m_pActionClear, m_pPointNumMode);
+        if(this->actions().contains(m_pTimeMode))
+        {
+            this->insertAction(m_pTimeMode, m_pPointNumMode);
+            this->removeAction(m_pTimeMode);
+        }
         setXAxisType(0);
     }
     else if(pAction == m_pPointNumMode)
     {
-        this->removeAction(pAction);
-        this->insertAction(m_pActionClear, m_pTimeMode);
+        if(this->actions().contains(m_pPointNumMode))
+        {
+            this->insertAction(m_pPointNumMode, m_pTimeMode);
+            this->removeAction(m_pPointNumMode);
+        }
         setXAxisType(1);
     }
     else if(pAction == m_pActionClear)
     {
-        clearAllData();
+        updateTimes = 0;
+        m_listZoomLevel.clear();
+        for(int i = 0; i < graphCount(); i++)
+        {
+            graph(i)->data().data()->clear();
+        }
+        for(int idx = 0; idx < allCurvesData.size(); idx++)
+        {
+            allCurvesData[idx].timeKeyVec.clear();
+            allCurvesData[idx].cntKeyVec.clear();
+            allCurvesData[idx].valVec.clear();
+        }
     }
     updateMyPlot();
 }
@@ -589,4 +625,9 @@ void MultiCurvesPlot::legendInit()
 //    this->plotLayout()->setColumnStretchFactor(1, 0.001);
     // 设置边框隐藏
     this->legend->setBorderPen(Qt::NoPen);
+}
+
+void MultiCurvesPlot::setCurveColor(int idx, int colorIdx)
+{
+    getColor[idx] = QColor(colorListStr.at(colorIdx));
 }

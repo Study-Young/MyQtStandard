@@ -1,6 +1,7 @@
-﻿#include "mainwindow.h"
+﻿#pragma execution_character_set("utf-8")
+
+#include "mainwindow.h"
 #include "Model/splashscreen.h"
-#include "UserManagement/usermanagement.h"
 
 #include <QApplication>
 
@@ -41,11 +42,29 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
+#if _MSC_VER
+    QTextCodec *codec = QTextCodec::codecForName("gbk");
+#else
+    QTextCodec *codec = QTextCodec::codecForName("utf-8");
+#endif
+    QTextCodec::setCodecForLocale(codec);
+    QTextCodec::setCodecForCStrings(codec);
+    QTextCodec::setCodecForTr(codec);
+#else
+    QTextCodec *codec = QTextCodec::codecForName("utf-8");
+    QTextCodec::setCodecForLocale(codec);
+#endif
+
 //    qInstallMessageHandler(myMessageOutput);
 
 //    SplashScreen *splash = new SplashScreen();
 //    splash->show();
 //    splash->showMessage("软件初始化...", Qt::AlignLeft |Qt::AlignBottom, Qt::black);
+
+    ConfigManagement::getInstance();
+    MyDataBase::getInstance();
+    UserManagement::getInstance();
 
     MainWindow w;
 //    splash->finish(&w);

@@ -1,5 +1,7 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "Model/IconHelper/iconhelper.h"
+#include "Model/messagetips.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -7,17 +9,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    mainInit();
+    mainInit(); 
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 
-    delete m_database;
-    delete m_configManagement;
-    delete m_logManagement;
-
+    LogManagement::deleteInstance();
+    ConfigManagement::deleteInstance();
+    MyDataBase::deleteInstance();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -80,8 +81,10 @@ void MainWindow::memberValueInit()
     workLogFileInit();
     plotInit();
     tableInit();
-    btnIndicatorInit();
     pushButtonInit();
+
+    catalogWidgetInit();
+    iconWidgetInit();
 
     databaseInit();
     styleSheetInit();
@@ -90,6 +93,10 @@ void MainWindow::memberValueInit()
 void MainWindow::uiInit()
 {
     ui->label_dbSta->setScaledContents(true);
+
+    ui->widget_switchButton3->setType(1);
+    ui->widget_switchButton4->setType(2);
+    ui->widget_switchButton5->setType(3);
 }
 
 void MainWindow::signalSlotInit()
@@ -121,7 +128,6 @@ void MainWindow::plotInit()
 {
     m_commonDataPlot = new MultiCurvesPlot(2);
     m_commonDataPlot->setXAxisType(1);
-    m_commonDataPlot->setDataShowMode(1);
     m_commonDataPlot->xAxis->setLabel("点数");
     m_commonDataPlot->yAxis->setLabel("相差");
     QGridLayout *layout_commonPlot = new QGridLayout();
@@ -130,9 +136,9 @@ void MainWindow::plotInit()
     ui->widget_commonPlot->setLayout(layout_commonPlot);
 
     m_logDataPlot = new MultiCurvesPlot(1);
+    m_logDataPlot->setCalDataPlotProperty();
     m_logDataPlot->setXAxisType(2);
     m_logDataPlot->setYAxisType(1);
-    m_logDataPlot->setDataShowMode(1);
     m_logDataPlot->xAxis->setLabel("时间间隔");
     m_logDataPlot->yAxis->setLabel("Allan");
     QGridLayout *layout_logPlot = new QGridLayout();
@@ -253,31 +259,111 @@ void MainWindow::onHeaderDoubleClickedSlot(int index)
     }
 }
 
-void MainWindow::btnIndicatorInit()
-{
-    m_indicator = new CustomIndicator(ui->widget_slide);
-    animation = new QPropertyAnimation(this);
-    animation->setTargetObject(m_indicator);
-    animation->setPropertyName("geometry");
-    animation->setDuration(300);
-}
-
 void MainWindow::pushButtonInit()
 {
-    m_functionBtnList.append(ui->pushButton_commonPlot);
-    m_functionBtnList.append(ui->pushButton_logPlot);
-    connect(ui->pushButton_commonPlot, &QPushButton::clicked, this, functionBtnClicked);
-    connect(ui->pushButton_logPlot, &QPushButton::clicked, this, functionBtnClicked);
+    //加入按钮组自动互斥
+    m_catalogBtnGroup = new QButtonGroup(this);
+    m_catalogBtnGroup->addButton(ui->toolButton_workLog, 0);
+    m_catalogBtnGroup->addButton(ui->toolButton_plot, 1);
+    m_catalogBtnGroup->addButton(ui->toolButton_dataTable, 2);
+    m_catalogBtnGroup->addButton(ui->toolButton_catalog, 3);
+    m_catalogBtnGroup->addButton(ui->toolButton_icon, 4);
+    m_catalogBtnGroup->addButton(ui->toolButton_button, 5);
+    m_catalogBtnGroup->addButton(ui->toolButton_delegate, 6);
 
-    m_slideBtnList.append(ui->pushButton_1);
-    m_slideBtnList.append(ui->pushButton_2);
-    m_slideBtnList.append(ui->pushButton_3);
-    m_slideBtnList.append(ui->pushButton_4);
-    connect(ui->pushButton_1, &QPushButton::clicked, this, &MainWindow::slideBtnClicked);
-    connect(ui->pushButton_2, &QPushButton::clicked, this, &MainWindow::slideBtnClicked);
-    connect(ui->pushButton_3, &QPushButton::clicked, this, &MainWindow::slideBtnClicked);
-    connect(ui->pushButton_4, &QPushButton::clicked, this, &MainWindow::slideBtnClicked);
+    //设置按钮可选中以及图标样式
+    QList<QAbstractButton *> btns = m_catalogBtnGroup->buttons();
+    foreach (QAbstractButton *btn, btns) {
+        QToolButton *b = (QToolButton *)btn;
+        //关联按钮单击事件
+        connect(b, &QToolButton::clicked, this, &MainWindow::catalogBtnClicked);
+        b->setCheckable(true);
+        b->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    }
+
+    ui->widget_lineTab3->setMinimumWidth(3);
+    m_lineTab3 = new LineTab(ui->widget_lineTab3);
+    m_lineTab3->setItemNum(7);
+    m_lineTab3->setLineDirection(1);
+    QGridLayout *pGridLayout3 = new QGridLayout();
+    pGridLayout3->setContentsMargins(0,0,0,0);
+    pGridLayout3->addWidget(m_lineTab3);
+    ui->widget_lineTab3->setLayout(pGridLayout3);
+    /*
+
+    //设置弱属性以便应用样式
+    ui->scrollAreaWidgetContents_catalog->setProperty("flag", "left");
+
+    //图标对应图形字体值
+    QList<int> icons;
+    icons << 0xe6dc << 0xe59c << 0xe60a << 0xe67c << 0xe504 << 0xe702 << 0xe657;
+
+    IconHelper::StyleColor styleColor;
+    styleColor.defaultBorder = true;
+    styleColor.position = "left";
+    styleColor.iconSize = 18;
+    styleColor.iconWidth = 30;
+    styleColor.iconHeight = 25;
+    styleColor.borderWidth = 4;
+    styleColor.borderColor = "#32B9CF";
+    styleColor.setColor("#187294", "#B6D7E3", "#145C75", "#F0F0F0");
+    IconHelper::setStyle(ui->scrollAreaWidgetContents_catalog, m_catalogBtnGroup->buttons(), icons, styleColor);
+    */
+
+    //默认选中某个按钮
+    ui->toolButton_workLog->click();
+
+    ui->widget_lineTab->setMinimumHeight(3);
+    m_lineTab = new LineTab(ui->widget_lineTab);
+    m_lineTab->setItemNum(4);
+    m_lineTab->setLineDirection(0);
+    QGridLayout *pGridLayout1 = new QGridLayout();
+    pGridLayout1->setContentsMargins(0,0,0,0);
+    pGridLayout1->addWidget(m_lineTab);
+    ui->widget_lineTab->setLayout(pGridLayout1);
+
+    m_slideBtnGroup = new QButtonGroup(this);
+    m_slideBtnGroup->addButton(ui->pushButton_1, 0);
+    m_slideBtnGroup->addButton(ui->pushButton_2, 1);
+    m_slideBtnGroup->addButton(ui->pushButton_3, 2);
+    m_slideBtnGroup->addButton(ui->pushButton_4, 3);    
+    QList<QAbstractButton *> btns2 = m_slideBtnGroup->buttons();
+    foreach (QAbstractButton *btn, btns2) {
+        QPushButton *b = (QPushButton *)btn;
+        //关联按钮单击事件
+        connect(b, &QToolButton::clicked, this, &MainWindow::slideBtnClicked);
+    }
     ui->pushButton_1->click();
+
+    ui->widget_lineTab2->setMinimumWidth(3);
+    m_lineTab2 = new LineTab(ui->widget_lineTab2);
+    m_lineTab2->setItemNum(4);
+    m_lineTab2->setLineDirection(1);
+    QGridLayout *pGridLayout2 = new QGridLayout();
+    pGridLayout2->setContentsMargins(0,0,0,0);
+    pGridLayout2->addWidget(m_lineTab2);
+    ui->widget_lineTab2->setLayout(pGridLayout2);
+
+    m_slideBtnGroup2 = new QButtonGroup(this);
+    m_slideBtnGroup2->addButton(ui->pushButton_5, 0);
+    m_slideBtnGroup2->addButton(ui->pushButton_6, 1);
+    m_slideBtnGroup2->addButton(ui->pushButton_7, 2);
+    m_slideBtnGroup2->addButton(ui->pushButton_8, 3);
+    QList<QAbstractButton *> btns3 = m_slideBtnGroup2->buttons();
+    foreach (QAbstractButton *btn, btns3) {
+        QPushButton *b = (QPushButton *)btn;
+        //关联按钮单击事件
+        connect(b, &QToolButton::clicked, this, &MainWindow::slideBtn2Clicked);
+    }
+    ui->pushButton_5->click();
+
+}
+
+void MainWindow::catalogBtnClicked()
+{
+    QAbstractButton *btn = (QAbstractButton *)sender();
+    ui->stackedWidget->setCurrentIndex(m_catalogBtnGroup->id(btn));
+    m_lineTab3->updatePaintSlot(m_catalogBtnGroup->id(btn));
 }
 
 void MainWindow::functionBtnClicked()
@@ -289,7 +375,6 @@ void MainWindow::functionBtnClicked()
         if(pFunctionBtn == pBtn)
         {
             pFunctionBtn->setProperty("status", "selected");
-            ui->stackedWidget_plot->setCurrentIndex(i);
         }
         else
         {
@@ -302,18 +387,43 @@ void MainWindow::functionBtnClicked()
 void MainWindow::slideBtnClicked()
 {
     QPushButton *btn = (QPushButton *)sender();
-    animation->setStartValue(m_indicator->geometry());
-    animation->setEndValue(btn->geometry());
-    animation->start();
+    ui->stackedWidget_catalog->setCurrentIndex(m_slideBtnGroup->id(btn));
+    m_lineTab->updatePaintSlot(m_slideBtnGroup->id(btn));
+//    if(m_slideBtnGroup->id(btn) == 2)
+//        ui->widget_triangleTab->updatePaintSlot(m_slideBtnGroup->id(btn));
+}
+
+void MainWindow::slideBtn2Clicked()
+{
+    QPushButton *btn = (QPushButton *)sender();
+    m_lineTab2->updatePaintSlot(m_slideBtnGroup2->id(btn));
+}
+
+void MainWindow::catalogWidgetInit()
+{
+    CatalogWidget *pCatalogWidget1 = new CatalogWidget(ui->widget_catalogWidget1);
+    QGridLayout *pLayout1 = new QGridLayout(ui->widget_catalogWidget1);
+    pLayout1->addWidget(pCatalogWidget1);
+
+    CatalogWidget2 *pCatalogWidget2 = new CatalogWidget2(ui->widget_catalogWidget2);
+    QGridLayout *pLayout2 = new QGridLayout(ui->widget_catalogWidget2);
+    pLayout2->addWidget(pCatalogWidget2);
+}
+
+void MainWindow::iconWidgetInit()
+{
+    IconWidget *pIconWidget = new IconWidget(ui->widget_iconWidget);
+    QGridLayout *pLayout = new QGridLayout(ui->widget_iconWidget);
+    pLayout->addWidget(pIconWidget);
 }
 
 void MainWindow::databaseInit()
 {
-    m_database = new DataBase();
+    m_myDatabase = MyDataBase::getInstance();
 
-    connect(this, &MainWindow::databaseInitSignal, m_database, &DataBase::databaseInitSlot);
-    connect(m_database, &DataBase::databaseInitCompleteSignal, this, &MainWindow::databaseInitCompleteSlot);
-    connect(m_database, &DataBase::updateMsgSignal, this, &MainWindow::updateMsg);
+    connect(this, &MainWindow::databaseInitSignal, m_myDatabase, &MyDataBase::databaseInitSlot);
+    connect(m_myDatabase, &MyDataBase::databaseInitCompleteSignal, this, &MainWindow::databaseInitCompleteSlot);
+    connect(m_myDatabase, &MyDataBase::updateMsgSignal, this, &MainWindow::updateMsg);
 
 //    connect(m_database, &DataBase::updateProgressValueSignal, this, &MainWindow::updateProgressValueSlot);
 
@@ -337,7 +447,7 @@ void MainWindow::databaseInitCompleteSlot(bool sta)
 
 void MainWindow::styleSheetInit()
 {
-    QFile file(":/qss/Monitor.qss");
+    QFile file(":/Monitor.qss");
     if (file.open(QIODevice::ReadOnly))
     {
         m_qssByteArray = file.readAll();
@@ -382,4 +492,9 @@ void MainWindow::updateMsg(const QString& fileName, const QString& functionName,
         ui->textBrowser_errorLog->append(workLogStr);
         emit recordErrorSignal(getCurTime(), fileName, functionName, msg);
     }
+}
+
+void MainWindow::on_pushButton_messageTipsTest_clicked()
+{
+    MessageTips::showMessageTips("OK!", this);
 }

@@ -13,9 +13,9 @@ QWidget#centralwidget{
 /*** 各个背景色 ***/
 
 /*** 按钮 ***/
-QPushButton#pushButton_query, #pushButton_showInfo, #pushButton_read, #pushButton_downLoad,
+QPushButton#pushButton_query, #pushButton_read, #pushButton_downLoad,
            #pushButton_firstPage, #pushButton_pageUp, #pushButton_pageDown, #pushButton_endPage,
-           #pushButton_toThePage, #pushButton_rowCountsSet, #pushButton_analyzeWidgetShowHide,
+           #pushButton_toThePage, #pushButton_rowCountsSet,
            #pushButton_plot, #pushButton_resetTimeRange{
     border-top: 2px solid rgb(250, 250, 250);
     border-left: 2px solid rgb(192, 192, 192);
@@ -27,7 +27,7 @@ QPushButton#pushButton_query, #pushButton_showInfo, #pushButton_read, #pushButto
     min-height:15px;
 }
 
-QPushButton#pushButton_tdev, #pushButton_xAxisType, #pushButton_databaseShowHide,
+QPushButton#pushButton_adev, #pushButton_tdev, #pushButton_xAxisType,
            #pushButton_showAll, #pushButton_clear{
     border-top: 3px solid rgb(250, 250, 250);
     border-left: 3px solid rgb(192, 192, 192);
@@ -42,25 +42,25 @@ QPushButton#pushButton_tdev, #pushButton_xAxisType, #pushButton_databaseShowHide
     font-size: 15px;
 }
 
-QPushButton#pushButton_query:hover, #pushButton_showInfo:hover, #pushButton_read:hover, #pushButton_downLoad:hover,
+QPushButton#pushButton_query:hover, #pushButton_read:hover, #pushButton_downLoad:hover,
            #pushButton_firstPage:hover, #pushButton_pageUp:hover, #pushButton_pageDown:hover, #pushButton_endPage:hover,
-           #pushButton_toThePage:hover, #pushButton_rowCountsSet:hover, #pushButton_databaseShowHide:hover,
-           #pushButton_tdev:hover, #pushButton_xAxisType:hover, #pushButton_analyzeWidgetShowHide:hover,
+           #pushButton_toThePage:hover, #pushButton_rowCountsSet:hover,
+           #pushButton_adev:hover, #pushButton_tdev:hover, #pushButton_xAxisType:hover,
            #pushButton_pause:hover, #pushButton_showAll:hover, #pushButton_clear:hover,
            #pushButton_plot:hover, #pushButton_resetTimeRange:hover{
     background-color: rgb(150, 150, 150);
 }
 
-QPushButton#pushButton_query:pressed, #pushButton_showInfo:pressed, #pushButton_read:pressed, #pushButton_downLoad:pressed,
+QPushButton#pushButton_query:pressed, #pushButton_read:pressed, #pushButton_downLoad:pressed,
            #pushButton_firstPage:pressed, #pushButton_pageUp:pressed, #pushButton_pageDown:pressed, #pushButton_endPage:pressed,
-           #pushButton_toThePage:pressed, #pushButton_rowCountsSet:pressed, #pushButton_databaseShowHide:pressed,
-           #pushButton_tdev:pressed, #pushButton_xAxisType:pressed, #pushButton_analyzeWidgetShowHide:pressed,
+           #pushButton_toThePage:pressed, #pushButton_rowCountsSet:pressed,
+           #pushButton_adev:pressed, #pushButton_tdev:pressed, #pushButton_xAxisType:pressed,
            #pushButton_pause:pressed, #pushButton_showAll:pressed, #pushButton_clear:pressed,
            #pushButton_plot:pressed, #pushButton_resetTimeRange:pressed{
     background-color: rgb(220, 220, 220);
 }
 
 /*** 分割线 ***/
-#line_1, #line_2, #line_3, #line_4, #line_5{
+#line, #line_1, #line_2, #line_3, #line_4, #line_5{
     background-color: rgb(0, 176, 240);
 }

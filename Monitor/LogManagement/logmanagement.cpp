@@ -3,6 +3,21 @@
 
 #include <QDebug>
 
+LogManagement *LogManagement::m_pInstance = nullptr;
+LogManagement *LogManagement::getInstance()
+{
+    if(m_pInstance == nullptr)
+    {
+        m_pInstance = new LogManagement();
+    }
+    return m_pInstance;
+}
+
+void LogManagement::deleteInstance()
+{
+    delete m_pInstance;
+}
+
 LogManagement::LogManagement(QObject *parent) : QObject(parent)
 {
     m_pThread = new QThread();
@@ -15,16 +30,6 @@ LogManagement::~LogManagement()
     m_pThread->quit();
     m_pThread->wait(1000);
     m_pThread->deleteLater();
-}
-
-LogManagement *LogManagement::m_pInstance = nullptr;
-LogManagement *LogManagement::getInstance()
-{
-    if(m_pInstance == nullptr)
-    {
-        m_pInstance = new LogManagement();
-    }
-    return m_pInstance;
 }
 
 void LogManagement::recordErrorSlot(QString strTime, QString strFile, QString strFunc, QString strError, QString strFolder1, QString strFolder2, QString strFolder3)
@@ -87,11 +92,6 @@ void LogManagement::readDataFromFileSlot(QString strFilePath, QString strArr)
     dataFile.close();
 
     emit readDataFromFileRespSignal(true, strFileName, QString::fromLatin1(baData), strArr);
-}
-
-void LogManagement::threadExit()
-{
-    this->deleteLater();
 }
 
 void LogManagement::mkFileAndWriteData(QString strFileType, QString strContent, QString strFolder1, QString strFolder2, QString strFolder3)

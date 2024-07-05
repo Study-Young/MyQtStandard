@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/qss">
+    <qresource prefix="/">
         <file>Monitor.qss</file>
         <file>image/arrow-down.png</file>
         <file>image/arrow-down-hover.png</file>

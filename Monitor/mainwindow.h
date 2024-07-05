@@ -9,13 +9,19 @@
 #include "global.h"
 #include "datastruct.h"
 
-#include "ConfigManagement/configmanagement.h"
+#include "catalogwidget.h"
+#include "catalogwidget2.h"
+#include "iconwidget.h"
+
 #include "LogManagement/logmanagement.h"
+#include "ConfigManagement/configmanagement.h"
+#include "DataBase/mydatabase.h"
+#include "UserManagement/usermanagement.h"
+
 #include "Model/multicurvesplot.h"
 #include "Model/itemdelegate.h"
 #include "Model/commontablemodel.h"
-#include "Model/customindicator.h"
-#include "DataBase/database.h"
+#include "Model/MyTab/SapidTab/linetab.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -45,7 +51,9 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
+    void catalogBtnClicked();
 
+    void on_pushButton_messageTipsTest_clicked();
 
 private:
     void mainInit();
@@ -61,6 +69,8 @@ private:
     void btnIndicatorInit();
     void pushButtonInit();
 
+    void catalogWidgetInit();
+    void iconWidgetInit();
 
     void styleSheetInit();
     void updateStyleSheet();
@@ -68,6 +78,7 @@ private:
     void commonTableInit();
     void functionBtnClicked();
     void slideBtnClicked();
+    void slideBtn2Clicked();
 
     void selectCurveSlot(int sta, int level, int pos);
     void showCurveSlot(bool checked);
@@ -77,7 +88,7 @@ private:
     Ui::MainWindow *ui;
     QByteArray m_qssByteArray;
 
-    DataBase *m_database;
+    MyDataBase *m_myDatabase;
 
     ConfigManagement *m_configManagement;
     LogManagement *m_logManagement;
@@ -89,11 +100,14 @@ private:
     QList<TESTDATA> m_commonTableData;
     QMap<QString, QCheckBox *> m_curvesMap;
 
+    LineTab *m_lineTab;
+    QButtonGroup *m_slideBtnGroup;
+
+    LineTab *m_lineTab2;
+    QButtonGroup *m_slideBtnGroup2;
+
+    LineTab *m_lineTab3;
+    QButtonGroup *m_catalogBtnGroup;
     QList<QPushButton *> m_functionBtnList;
-
-    CustomIndicator *m_indicator;
-    QPropertyAnimation *animation;
-
-    QList<QPushButton *> m_slideBtnList;
 };
 #endif // MAINWINDOW_H

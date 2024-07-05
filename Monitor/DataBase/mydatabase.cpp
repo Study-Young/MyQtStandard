@@ -1,6 +1,21 @@
 ﻿#include "mydatabase.h"
 #include <QDebug>
 
+MyDataBase *MyDataBase::m_pInstance = nullptr;
+MyDataBase *MyDataBase::getInstance()
+{
+    if(m_pInstance == nullptr)
+    {
+        m_pInstance = new MyDataBase();
+    }
+    return m_pInstance;
+}
+
+void MyDataBase::deleteInstance()
+{
+    delete m_pInstance;
+}
+
 MyDataBase::MyDataBase(QObject *parent)
     :DataBase(parent)
 {

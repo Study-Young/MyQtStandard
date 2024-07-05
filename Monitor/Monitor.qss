@@ -339,43 +339,7 @@ QLabel#label_utcTime, #label_netSetTitle, #label_siteSetTitle,
     color: white;
 }
 
-QLabel#label_linkIdTag, #label_linkId,
-      #label_deviceIdTag, #label_deviceId,
-      #label_deviceTypeTag, #label_deviceType,
-      #label_deviceNumberTag, #label_deviceNumber,
-      #label_linkStaTag, #label_linkSta,
-      #label_deviceWorkStaTag, #label_deviceWorkSta,
-      #label_linkRealTimeDelayTag, #label_linkRealTimeDelay, #label_linkRealTimeDelayUnit,
-      #label_localTimeDiffTag, #label_localTimeDiff, #label_localTimeDiffUnit,
-      #label_curTimeDelayTag, #label_curTimeDelay, #label_curTimeDelayUnit,
-      #label_CurTimeSlotTag, #label_CurTimeSlot, #label_CurTimeSlotUnit,
-      #label_distanceTag, #label_distance, #label_distanceUnit,
-      #label_alarmTag, #label_alarm,
-      #label_fiber1SendPowerTag, #label_fiber1SendPower, #label_fiber1SendPowerUnit,
-      #label_fiber2SendPowerTag, #label_fiber2SendPower, #label_fiber2SendPowerUnit,
-      #label_fiber1RecvPowerTag, #label_fiber1RecvPower, #label_fiber1RecvPowerUnit,
-      #label_fiber2RecvPowerTag, #label_fiber2RecvPower, #label_fiber2RecvPowerUnit,
-      #label_fiber1TempTag, #label_fiber1Temp, #label_fiber1TempUnit,
-      #label_fiber2TempTag, #label_fiber2Temp, #label_fiber2TempUnit,
-      #label_bcd1OutputStaTag, #label_bcd1OutputSta,
-      #label_bcd2OutputStaTag, #label_bcd2OutputSta,
-      #label_bcd3OutputStaTag, #label_bcd3OutputSta,
-      #label_bcd4OutputStaTag, #label_bcd4OutputSta,
-      #label_1ppsInputStaTag, #label_1ppsInputSta,
-      #label_10MInputStaTag, #label_10MInputSta,
-      #label_timeCodeInputStaTag, #label_timeCodeInputSta,
-      #label_ipAddressSetTag, #label_maskSetTag, #label_gatewaySetTag,
-      #label_linkIdSetTag, #label_siteAddressSetTag, #label_siteTypeSetTag,
-      #label_timeDelayCompensationSetTag, #label_timeDelayCompensationSetUnit,
-      #label_modulationTimeIntervalSetTag, #label_modulationTimeIntervalSetUnit,
-      #label_timeDelayCompensationSetTag_local, #label_timeDelayCompensationSetDeviceIdTag,
-      #label_timeDelayCompensationSetValueTag, #label_timeDelayCompensationSetUnit_local,
-      #label_boardNameTag, #label_armVersionTag, #label_fpgaVersionTag,
-      #label_monitorBoardTag, #label_monitorBoardArmVersion, #label_monitorBoardFpgaVersion,
-      #label_fiberBoardTag, #label_fiberBoardArmVersion, #label_fiberBoardFpgaVersion,
-      #label_electricBoardTag, #label_electricBoardArmVersion, #label_electricBoardFpgaVersion,
-      #label_bcodeBoardTag, #label_bcodeBoardArmVersion, #label_bcodeBoardFpgaVersion
-      {
+QLabel#label_linkIdTag{
     font-family: "黑体";
     font-size: 25px;
     font-weight: bold;

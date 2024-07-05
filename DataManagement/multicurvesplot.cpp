@@ -1,16 +1,11 @@
 ﻿#include "multicurvesplot.h"
-#include <QColorDialog>
-#include <QDebug>
 
-#pragma execution_character_set("utf-8")
-
-MultiCurvesPlot::MultiCurvesPlot(int curvesCnt, QWidget *parent):
+MultiCurvesPlot::MultiCurvesPlot(int _curvesCnt, QWidget *parent):
+    allCurvesData(_curvesCnt),
     QCustomPlot(parent)
-    ,allCurvesData(curvesCnt)
 {
     mainInit();
     connectSignalsSlots();
-    startTimer(100, Qt::CoarseTimer);//定频刷新曲线图
 }
 
 void MultiCurvesPlot::mainInit()
@@ -21,414 +16,98 @@ void MultiCurvesPlot::mainInit()
 
 void MultiCurvesPlot::connectSignalsSlots()
 {
-    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));//左右y轴同步放缩
     connect(this->selectionRect(), &QCPSelectionRect::accepted, this, &MultiCurvesPlot::slotRect);
+}
+
+void MultiCurvesPlot::mouseReleaseEvent(QMouseEvent *event)
+{
+    QCustomPlot::mouseReleaseEvent(event);
+
+    if(event->button() == Qt::LeftButton)
+    {
+        if(pauseFlag && slotRectFlag)
+        {
+            slotRectFlag = false;
+
+            stZoomRangeLevel stRangeLevel;
+            if(this->xAxis->visible())
+            {
+                stRangeLevel.dXLower = this->xAxis->range().lower;
+                stRangeLevel.dXUpper = this->xAxis->range().upper;
+            }
+            if(this->yAxis->visible())
+            {
+                stRangeLevel.dYLower = this->yAxis->range().lower;
+                stRangeLevel.dYUpper = this->yAxis->range().upper;
+            }
+
+            m_listZoomLevel.insert(0, stRangeLevel);
+            if(m_listZoomLevel.size() > 1)
+            {
+                if(!this->actions().contains(m_pActionRestoreBefore))
+                    this->insertAction(m_pActionContinue, m_pActionRestoreBefore);
+            }
+        }
+    }
 }
 
 void MultiCurvesPlot::memberValueInit()
 {
-    tracer = new QCPItemTracer(this);       //游标
-    tracerXText = new QCPItemText(this);    //游标的X值文本框
-    tracerYText = new QCPItemText(this);    //游标的Y值文本框
-    traceItemMode = TRACEITEMMODE::MouseTraceItem;
-    curvesCnt = allCurvesData.size();
+    m_curvesCnt = allCurvesData.size();
+    updateTimes = 0;
 
+    slotRectFlag = false;
     pauseFlag = false;
-    tracerEnable = false;
-    dataShowMode = 0;
-}
+    dataShowMode = 0; 
+    m_startTime = QDateTime::currentSecsSinceEpoch();
 
-void MultiCurvesPlot::uiInit()
-{
-    this->setMouseTracking(true);
-    setStyleSheet();
-    setMouseTraceItem();
-    paintAttributeInit();
-    controlsInit();
+    contextMenuInit();
     curvesDataInit();
 }
 
-void MultiCurvesPlot::showCurves(QList<uint16_t> _idxList)
+void MultiCurvesPlot::contextMenuInit()
 {
-    this->clearGraphs();//先移除所有的graph
-    idxList = _idxList;//备份，可能别的函数需要它
-    curveIdx2graphPtr.clear();//清除曲线编号->graph指针的映射
+    //右键菜单
+    this->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    int graphIdx = 0;
+    m_pActionRestoreBefore = new QAction("返回上一级");
+    connect(m_pActionRestoreBefore, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-    for(QList<uint16_t>::const_iterator it = idxList.begin(); it != idxList.end(); it++)
-    {   //*it为每一个要显示的曲线编号
-        uint16_t curveIdx = *it;
-        if(curveIdx > curvesCnt)
-        {
-            qDebug() << QString("warning: MultiCurvesPlot::showCurves->超出数据源max index").arg(*it);
-            continue;
-        }
+    m_pActionShowAll = new QAction("显示全部数据");
+    connect(m_pActionShowAll, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-        this->addGraph(this->xAxis, this->yAxis);
-        QCPGraph* pGraph = graph(graphIdx);
-        curveIdx2graphPtr[curveIdx] = pGraph;//记录：曲线索引->graph指针的映射
-        pGraph->setPen(QPen(getColor[curveIdx]));//线的颜色随机
-        pGraph->setLineStyle(QCPGraph::lsLine);//阶梯线样式
-        this->graph(graphIdx)->setName(getName[curveIdx]);
-        graphIdx++;
-    }
+    m_pActionShowPart = new QAction("显示最新数据");
+    connect(m_pActionShowPart, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-    if(graphCount() > 0)
-        traceGraph = graph(0);
-    else
-        traceGraph = NULL;
-//    showAllGraph();
-    this->replot();
-}
+    m_pActionPause = new QAction("曲线暂停更新");
+    connect(m_pActionPause, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-void MultiCurvesPlot::setGraphVisible(int channelNum, bool visible)
-{
-    this->graph(channelNum)->setVisible(visible);
-}
+    m_pActionContinue = new QAction("曲线恢复更新");
+    connect(m_pActionContinue, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-void  MultiCurvesPlot::setXAxis(double range)
-{
-    xAxisShowRange =  range;//设置X轴的范围
-}
+    m_pTimeMode = new QAction("X轴类型:时间");
+    connect(m_pTimeMode, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-void MultiCurvesPlot::setXAxisType(int type)
-{
-    xAxisType = type;
-    if(xAxisType == 0)
-    {
-        QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);//日期做X轴
-        dateTicker->setDateTimeFormat("hh:mm:ss\nyyyy-MM-dd");//日期格式(可参考QDateTime::fromString()函数)
-        this->xAxis->setTicker(dateTicker);//设置X轴为时间轴
+    m_pPointNumMode = new QAction("X轴类型:点数");
+    connect(m_pPointNumMode, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-        if(!allCurvesData[0].valVec.isEmpty())
-        {
-            QCPGraph* pGraph = curveIdx2graphPtr[0];
-            pGraph->data().data()->clear();
-            pGraph->setData(allCurvesData[0].timeKeyVec, allCurvesData[0].valVec);
-        }
-    }
-    else if(xAxisType == 1)
-    {
-        QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);//点数做X轴
-        fixedTicker->setScaleStrategy( QCPAxisTickerFixed::ssMultiples );
-        this->xAxis->setTicker(fixedTicker);
-        this->xAxis->setRange(0,xAxisShowRange);
+    m_pActionClear = new QAction("清除曲线");
+    connect(m_pActionClear, &QAction::triggered, this, &MultiCurvesPlot::slotContexMenu);
 
-        if(!allCurvesData[0].valVec.isEmpty())
-        {
-            QCPGraph* pGraph = curveIdx2graphPtr[0];
-            pGraph->data().data()->clear();
-            pGraph->setData(allCurvesData[0].cntKeyVec, allCurvesData[0].valVec);
-        }
-    }
-    else if(xAxisType == 2)
-    {
-        QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);//log做X轴
-        logTicker->setLogBase(10);
-        this->xAxis->setTicker(logTicker);
-        this->xAxis->setScaleType(QCPAxis::stLogarithmic);
-        this->xAxis->setRange(1,110000);
-    }
-
-    this->xAxis->rescale(true);
-    this->yAxis->rescale(true);
-    this->replot();
-}
-
-void MultiCurvesPlot::setYAxis(double lower, double upper)
-{
-    this->yAxis->setRange(lower, upper);//设置Y轴的范围
-}
-
-void MultiCurvesPlot::setYAxisType(int type)
-{
-    if(type == 0)
-    {
-
-    }
-    else if(type == 1)
-    {
-        QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);//log做X轴
-        logTicker->setLogBase(10);
-        this->yAxis->setTicker(logTicker);
-        this->yAxis->setScaleType(QCPAxis::stLogarithmic);
-        this->yAxis2->setTicker(logTicker);
-        this->yAxis2->setScaleType(QCPAxis::stLogarithmic);
-    }
-    this->replot();
-}
-
-void MultiCurvesPlot::setYAxisAuto(bool flag)
-{
-    yAxisAuto = flag;
-}
-
-
-void MultiCurvesPlot::setUpdateTimes(int cnt)
-{
-    updateTimes = cnt;
-}
-
-void MultiCurvesPlot::setCurveName(int idx, const QString newName)
-{
-    if(idx < getName.size())
-        getName[idx] = newName;
-    else
-        qDebug() << "warning: MultiCurvesPlot::setCurveName -> invalid idx!";
-}
-
-void MultiCurvesPlot::setCurvesName(QVector<QString> _nameVec)
-{
-    _nameVec.resize(getName.size());//截断或补长
-    getName = _nameVec;
-}
-
-void MultiCurvesPlot::addData(int idx, double time, double cnt, double y)
-{
-    if(idx > curvesCnt)
-    {
-        qDebug() << QString("warning:下位机企图绘制编号为%1的曲线！").arg(idx);
-        return;
-    }
-//    if(y > 1e10 || y < -1e10)//接收到的异常值直接不绘制
-//        return;
-
-    allCurvesData[idx].timeKeyVec.append(time);//备份数据源
-    allCurvesData[idx].cntKeyVec.append(cnt);//备份数据源
-    allCurvesData[idx].valVec.append(y);
-
-    if(curveIdx2graphPtr.contains(idx))//第idx个曲线正在显示中
-    {
-        QCPGraph* pGraph = curveIdx2graphPtr[idx];
-        if(xAxisType == 0)
-            pGraph->addData(time, y);
-        else
-            pGraph->addData(cnt, y);
-//        pGraph->data().data()->removeBefore(0);
-        updateTimes++;
-    }
-}
-
-void MultiCurvesPlot::setData(int curveIdx, const QVector<double> &times, const QVector<double> &cnts, const QVector<double> &values)
-{
-    if(curveIdx > curvesCnt)
-    {
-        qDebug() << QString("warning:下位机企图绘制编号为%1的曲线！").arg(curveIdx);
-        return;
-    }
-
-    allCurvesData[curveIdx].timeKeyVec.append(times);//备份数据源
-    allCurvesData[curveIdx].cntKeyVec.append(cnts);//备份数据源
-    allCurvesData[curveIdx].valVec.append(values);
-
-    if(curveIdx2graphPtr.contains(curveIdx))//第idx个曲线正在显示中
-    {
-        QCPGraph* pGraph = curveIdx2graphPtr[curveIdx];
-        pGraph->data().data()->clear();
-
-        if(xAxisType == 0)
-        {
-            pGraph->setData(times, values);
-        }
-        else
-        {
-            pGraph->setData(cnts, values);
-        }
-    }
-}
-
-void MultiCurvesPlot::setPause(bool enable)
-{
-    pauseFlag = enable;
-}
-
-void MultiCurvesPlot::setDataShowMode(int mode)
-{
-    dataShowMode = mode;
-}
-
-void MultiCurvesPlot::clearAllData()
-{
-    for(int i = 0; i < graphCount(); i++)
-    {
-        graph(i)->data().data()->clear();
-    }
-
-    for(int idx = 0; idx < allCurvesData.size(); idx++)
-    {
-        allCurvesData[idx].timeKeyVec.clear();
-        allCurvesData[idx].cntKeyVec.clear();
-        allCurvesData[idx].valVec.clear();
-    }
-
-    updateTimes = 0;
-}
-
-void MultiCurvesPlot::timerEvent(QTimerEvent *event)
-{
-    Q_UNUSED(event);
-
-    if(!pauseFlag)
-    {
-        switch (dataShowMode) {
-        case DATASHOWMODE::FixedWindowMode:
-            if(xAxisType == 0)
-            {
-                double curSeclf;
-                if(allCurvesData[0].timeKeyVec.isEmpty())
-                    curSeclf = (double)(QDateTime::currentMSecsSinceEpoch()) / 1000.0;
-                else
-                    curSeclf = allCurvesData[0].timeKeyVec.last();
-                this->xAxis->setRange(curSeclf - xAxisShowRange, curSeclf);
-            }
-            else if(xAxisType == 1)
-            {
-                if(updateTimes>xAxisShowRange)
-                {
-                    this->xAxis->setRange(updateTimes - xAxisShowRange, updateTimes);
-                }
-                else
-                {
-                    this->xAxis->setRange(0, xAxisShowRange);
-                }
-            }
-            else if(xAxisType == 2)
-            {
-                this->xAxis->setRange(1, 110000);
-            }
-
-            if(yAxisAuto)
-                this->yAxis->rescale(true);
-            break;
-        case DATASHOWMODE::PushMode:
-            this->xAxis->rescale(true);
-            if(yAxisAuto)
-                this->yAxis->rescale(true);
-            break;
-        default:
-            break;
-        }
-    }
-
-    if(traceItemMode == TRACEITEMMODE::FixedTraceItem)
-    {
-        getTracerItemCurValue();
-    }
-
-    this->replot();
-}
-
-void MultiCurvesPlot::setTracerEnable(bool enable)
-{
-    tracerEnable = enable;
-    if(tracerEnable)
-    {
-        tracer->setVisible(true);
-        tracerXText->setVisible(true);
-        tracerYText->setVisible(true);
-    }
-    else
-    {
-        tracer->setVisible(false);
-        tracerXText->setVisible(false);
-        tracerYText->setVisible(false);
-    }
-}
-
-void MultiCurvesPlot::setStyleSheet()
-{
-    this->setBackground(QColor(0, 32, 96));
-
-    this->xAxis->setBasePen(QPen(QColor(102, 255, 255), 1));        // 轴线的画笔
-    this->xAxis->setTickPen(QPen(QColor(102, 255, 255), 1));        // 轴刻度线的画笔
-    this->xAxis->setSubTickPen(QPen(QColor(102, 255, 255), 1));     // 轴子刻度线的画笔
-    this->xAxis->setTickLabelColor(QColor(102, 255, 255));          // 轴刻度文字颜色
-    this->xAxis->setLabelColor(QColor(102, 255, 255));
-    this->xAxis->setTickLengthIn(3);
-    this->xAxis->setTickLengthOut(5);
-
-    this->yAxis->setBasePen(QPen(QColor(102, 255, 255), 1));        // 轴线的画笔
-    this->yAxis->setTickPen(QPen(QColor(102, 255, 255), 1));        // 轴刻度线的画笔
-    this->yAxis->setSubTickPen(QPen(QColor(102, 255, 255), 1));     // 轴子刻度线的画笔
-    this->yAxis->setTickLabelColor(QColor(102, 255, 255));          // 轴刻度文字颜色
-    this->yAxis->setLabelColor(QColor(102, 255, 255));
-
-    this->yAxis2->setBasePen(QPen(QColor(102, 255, 255), 1));       // 轴线的画笔
-    this->yAxis2->setTickPen(QPen(QColor(102, 255, 255), 1));       // 轴刻度线的画笔
-    this->yAxis2->setSubTickPen(QPen(QColor(102, 255, 255), 1));    // 轴子刻度线的画笔
-    this->yAxis2->setTickLabelColor(QColor(102, 255, 255));         // 轴刻度文字颜色
-
-    this->xAxis->grid()->setPen(QPen(QColor(183, 255, 255), 1, Qt::DashLine));
-    this->yAxis->grid()->setPen(QPen(QColor(183, 255, 255), 1, Qt::DashLine));
-    this->xAxis->grid()->setSubGridPen(QPen(QColor(183, 255, 255), 1, Qt::DotLine));
-    this->yAxis->grid()->setSubGridPen(QPen(QColor(183, 255, 255), 1, Qt::DotLine));
-    this->xAxis->grid()->setSubGridVisible(true);
-    this->yAxis->grid()->setSubGridVisible(true);
-    this->xAxis->grid()->setZeroLinePen(QPen(QColor(183, 255, 255)));
-    this->yAxis->grid()->setZeroLinePen(QPen(QColor(183, 255, 255)));
-}
-
-void MultiCurvesPlot::setMouseTraceItem()
-{
-    //游标以及游标文本框设置
-    tracer->setInterpolating(false);//禁用插值
-    tracer->setPen(QPen(Qt::DashLine));//虚线游标
-    tracer->setStyle(QCPItemTracer::tsCrosshair);//游标样式：十字星、圆圈、方框等
-
-    tracerXText->setPositionAlignment(Qt::AlignBottom|Qt::AlignRight);
-    tracerXText->position->setType(QCPItemPosition::ptAxisRectRatio);//位置类型（当前轴范围的比例）
-    tracerXText->position->setCoords(0, 0.99); // 在plot中的位置
-    tracerXText->position->setParentAnchorX(tracer->position);//X位置锚定到游标的X位置
-    tracerXText->setText("no curves..");
-    tracerXText->setFont(QFont(font().family(), 12));
-    tracerXText->setPen(QPen(Qt::black));
-    tracerXText->setBackgroundColor(Qt::green);
-    tracerXText->setPadding(QMargins(2,2,2,2));//边界宽度
-    tracerXText->setVisible(false);
-
-    tracerYText->setPositionAlignment(Qt::AlignTop|Qt::AlignLeft);
-    tracerYText->position->setType(QCPItemPosition::ptAxisRectRatio);//位置类型（当前轴范围的比例）
-    tracerYText->position->setCoords(0.01, 0); // 在plot中的位置
-    tracerYText->setText("no curves..");
-    tracerYText->position->setParentAnchorY(tracer->position);//Y位置锚定到游标的Y位置
-    tracerYText->setFont(QFont(font().family(), 12));
-    tracerYText->setPen(QPen(Qt::black));
-    tracerYText->setBackgroundColor(Qt::green);
-    tracerYText->setPadding(QMargins(2,2,2,2));//边界宽度
-    tracerYText->setVisible(false);
-}
-
-void MultiCurvesPlot::paintAttributeInit()
-{
-    this->setInteractions(QCP::iRangeDrag //可平移
-                          | QCP::iRangeZoom //可滚轮缩放
-    //                          | QCP::iSelectPlottables //可选中曲线
-                          | QCP::iSelectLegend );//可选中图例
-    this->setNoAntialiasingOnDrag(true);//禁用抗锯齿，以提高性能
-    this->setSelectionRectMode(QCP::srmCustom);
-}
-
-void MultiCurvesPlot::controlsInit()
-{
-//    this->setOpenGl(true);
-//    qDebug() << "QCustomplot opengl status = " << this->openGl();
-    this->yAxis2->setVisible(true);
-
-    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);//日期做X轴
-    dateTicker->setDateTimeFormat("hh:mm:ss\nyyyy-MM-dd");//日期格式(可参考QDateTime::fromString()函数)
-    this->xAxis->setTicker(dateTicker);//设置X轴为时间轴
-    this->xAxis->setTickLabels(true);//显示刻度标签
+//    this->addAction(m_pActionShowAll);
+    this->addAction(m_pActionPause);
+//    this->addAction(m_pTimeMode);
+    this->addAction(m_pActionClear);
 }
 
 void MultiCurvesPlot::curvesDataInit()
 {
-    getColor.resize(curvesCnt);
+    getColor.resize(m_curvesCnt);
     for(int i = 0; i < getColor.size();i++)
     {
         getColor[i] = QColor(colorListStr.at(i));
     }
-    getName.resize(curvesCnt);
+    getName.resize(m_curvesCnt);
     for(int i = 0; i < getName.size();i++)//设置默认曲线名称
     {
         getName[i] = QString("通道 %1").arg(i+1);
@@ -442,28 +121,513 @@ void MultiCurvesPlot::curvesDataInit()
     }
 }
 
-
-void MultiCurvesPlot::getTracerItemCurValue()
+void MultiCurvesPlot::uiInit()
 {
-    tracer->setGraph(traceGraph);
-    tracer->setGraphKey(mouseXPos);
+    setMyStyleSheet();
+    paintAttributeInit();
+//    legendInit();
 }
 
-void MultiCurvesPlot::setScatterPointEnable(bool enable)
+void MultiCurvesPlot::setMyStyleSheet()
 {
-    for (int i = 0; i < this->graphCount(); ++i)
+    QColor backgroundColor = QColor(0, 32, 96);     //QColor(255, 255, 255)
+    QColor axisColor = QColor(128, 255, 255);       //QColor(0, 0, 0)
+    QColor gridColor = QColor(0, 70, 220);//QColor(200, 255, 255);       //QColor(200, 200, 200)
+
+    this->setBackground(backgroundColor);
+
+    this->xAxis->setBasePen(QPen(axisColor, 1));        // 轴线的画笔
+    this->xAxis->setTickPen(QPen(axisColor, 1));        // 轴刻度线的画笔
+    this->xAxis->setSubTickPen(QPen(axisColor, 1));     // 轴子刻度线的画笔
+    this->xAxis->setTickLabelColor(axisColor);          // 轴刻度文字颜色
+    this->xAxis->setLabelColor(axisColor);
+    this->xAxis->setTickLengthIn(3);
+    this->xAxis->setTickLengthOut(5);
+
+    this->yAxis->setBasePen(QPen(axisColor, 1));        // 轴线的画笔
+    this->yAxis->setTickPen(QPen(axisColor, 1));        // 轴刻度线的画笔
+    this->yAxis->setSubTickPen(QPen(axisColor, 1));     // 轴子刻度线的画笔
+    this->yAxis->setTickLabelColor(axisColor);          // 轴刻度文字颜色
+    this->yAxis->setLabelColor(axisColor);
+
+    this->xAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    this->yAxis->grid()->setPen(QPen(gridColor, 1, Qt::DotLine));
+    this->xAxis->grid()->setSubGridPen(QPen(gridColor, 1, Qt::DotLine));
+    this->yAxis->grid()->setSubGridPen(QPen(gridColor, 1, Qt::DotLine));
+    this->xAxis->grid()->setZeroLinePen(QPen(gridColor));
+    this->yAxis->grid()->setZeroLinePen(QPen(gridColor));
+
+    QFont font;
+
+    font = this->xAxis->tickLabelFont();
+    font.setPointSize(11);
+    this->xAxis->setTickLabelFont(font);
+
+    font = this->yAxis->tickLabelFont();
+    font.setPointSize(12);
+    this->yAxis->setTickLabelFont(font);
+
+//    font = this->xAxis->labelFont();
+//    font.setPointSize(13);
+//    this->xAxis->setLabelFont(font);
+
+//    font = this->yAxis->labelFont();
+//    font.setPointSize(13);
+//    this->yAxis->setLabelFont(font);
+
+    this->setStyleSheet("QMenu {\
+                             background-color: rgb(10, 40, 70);\
+                             border: 1px solid gray;\
+                         }\
+                         QMenu::item{\
+                             background-color: transparent;\
+                             padding: 4px 8px;\
+                             margin: 0px 8px;\
+                             border-bottom: 1px solid gray;\
+                             color: rgb(10, 210, 240);\
+                         }\
+                         QMenu::item:selected{\
+                             background-color: #94D2EF;\
+                             color: black;\
+                         }");
+}
+
+void MultiCurvesPlot::paintAttributeInit()
+{
+    this->setSelectionRectMode(QCP::srmZoom);
+    this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); //可平移
+    this->setNoAntialiasingOnDrag(true);//禁用抗锯齿，以提高性能
+}
+
+void MultiCurvesPlot::showCurves(QList<uint16_t> idxList)
+{
+    this->clearGraphs();//先移除所有的graph
+    curveIdx2graphPtr.clear();//清除曲线编号->graph指针的映射
+
+    int graphIdx = 0;
+
+    for(QList<uint16_t>::const_iterator it = idxList.begin(); it != idxList.end(); it++)
+    {   //*it为每一个要显示的曲线编号
+        uint16_t curveIdx = *it;
+        if(curveIdx > m_curvesCnt)
+        {
+            continue;
+        }
+
+        this->addGraph(this->xAxis, this->yAxis);
+        QCPGraph* pGraph = graph(graphIdx);
+        curveIdx2graphPtr[curveIdx] = pGraph;//记录：曲线索引->graph指针的映射
+        pGraph->setPen(QPen(getColor[curveIdx]));//线的颜色随机
+        pGraph->setLineStyle(QCPGraph::lsLine);//阶梯线样式
+        this->graph(graphIdx)->setName(getName[curveIdx]);
+        graphIdx++;
+    }
+
+    this->replot();
+}
+
+void MultiCurvesPlot::setGraphVisible(int idx, bool visible)
+{
+    this->graph(idx)->setVisible(visible);
+}
+
+void MultiCurvesPlot::setDataShowMode(int mode)
+{
+    dataShowMode = mode;
+}
+
+void MultiCurvesPlot::setShowPause(bool pause)
+{
+    if(pause)
+        m_pActionPause->trigger();
+    else
+        m_pActionContinue->trigger();
+}
+
+void MultiCurvesPlot::setXAxisShowMode(int mode)
+{
+    if(mode == 0)
+        m_pTimeMode->trigger();
+    else if(mode == 1)
+        m_pPointNumMode->trigger();
+}
+
+void  MultiCurvesPlot::setXAxisRange(double range)
+{
+    xAxisShowRange =  range;//设置X轴的范围
+}
+
+void MultiCurvesPlot::setXAxisType(int type)
+{
+    xAxisType = type;
+    if(xAxisType == 0)
     {
-        if(enable)
-//            this->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, 5));//显示散点
-            this->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 2));//显示散点
+        QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);//日期做X轴
+        dateTicker->setDateTimeFormat("hh:mm:ss\nyyyy-MM-dd");  //日期格式(可参考QDateTime::fromString()函数)
+        this->xAxis->setTicker(dateTicker);//设置X轴为时间轴
+        this->xAxis->setLabel("时间");
+
+        for(int i=0; i<m_curvesCnt; i++)
+        {
+            if(!allCurvesData[i].valVec.isEmpty())
+            {
+                QCPGraph* pGraph = curveIdx2graphPtr[i];
+                pGraph->data().data()->clear();
+                pGraph->setData(allCurvesData[i].timeKeyVec, allCurvesData[i].valVec);
+            }
+        }
+    }
+    else if(xAxisType == 1)
+    {
+        QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);//点数做X轴
+        fixedTicker->setScaleStrategy( QCPAxisTickerFixed::ssMultiples );
+        this->xAxis->setTicker(fixedTicker);
+        this->xAxis->setRange(0, xAxisShowRange);
+        this->xAxis->setLabel("采样点数");
+
+        for(int i=0; i<m_curvesCnt; i++)
+        {
+            if(!allCurvesData[i].valVec.isEmpty())
+            {
+                QCPGraph* pGraph = curveIdx2graphPtr[i];
+                pGraph->data().data()->clear();
+                pGraph->setData(allCurvesData[i].cntKeyVec, allCurvesData[i].valVec);
+            }
+        }
+    }
+    else if(xAxisType == 2)
+    {
+        QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);//log做X轴
+        logTicker->setLogBase(10);
+        this->xAxis->setTicker(logTicker);
+        this->xAxis->setScaleType(QCPAxis::stLogarithmic);
+        this->xAxis->setRange(1,100000);
+    }
+
+    this->replot();
+}
+
+void MultiCurvesPlot::setYAxisRange(double lower, double upper)
+{
+    this->yAxis->setRange(lower, upper);//设置Y轴的范围
+}
+
+void MultiCurvesPlot::setYAxisType(int type)
+{
+    if(type == 1)
+    {
+        QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);//log做X轴
+        logTicker->setLogBase(10);
+        this->yAxis->setTicker(logTicker);
+        this->yAxis->setScaleType(QCPAxis::stLogarithmic);
+    }
+    this->replot();
+}
+
+void MultiCurvesPlot::setYAxisAuto(bool flag)
+{
+    yAxisAuto = flag;
+}
+
+void MultiCurvesPlot::setYAxisName(QString name)
+{
+    this->yAxis->setLabel(name);
+}
+
+void MultiCurvesPlot::setPause(bool enable)
+{
+    pauseFlag = enable;
+}
+
+void MultiCurvesPlot::setUpdateTimes(int cnt)
+{
+    updateTimes = cnt;        
+}
+
+int MultiCurvesPlot::getUpdateTimes()
+{
+    return updateTimes;
+}
+
+void MultiCurvesPlot::setStartTime(QDateTime startTime)
+{
+    m_startTime = startTime.toSecsSinceEpoch();
+}
+
+void MultiCurvesPlot::setCalDataPlotProperty()
+{
+    this->setContextMenuPolicy(Qt::NoContextMenu);
+    this->setSelectionRectMode(QCP::srmNone);
+    this->setInteractions(QCP::iNone);
+}
+
+void MultiCurvesPlot::addData(const int idx, double time, double cnt, double value)
+{
+    allCurvesData[idx].timeKeyVec.append(time);//备份数据源
+    allCurvesData[idx].cntKeyVec.append(cnt);//备份数据源
+    allCurvesData[idx].valVec.append(value);
+
+    if(curveIdx2graphPtr.contains(idx))//第idx个曲线正在显示中
+    {
+        QCPGraph* pGraph = curveIdx2graphPtr[idx];
+        if(xAxisType == 0)
+            pGraph->addData(time, value);
         else
-            this->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssNone));//不显示散点
+            pGraph->addData(cnt, value);
+    }
+}
+
+void MultiCurvesPlot::addData(const int idx, const QVector<double> &times, const QVector<double> &cnts, const QVector<double> &values)
+{
+    allCurvesData[idx].timeKeyVec.append(times);//备份数据源
+    allCurvesData[idx].cntKeyVec.append(cnts);//备份数据源
+    allCurvesData[idx].valVec.append(values);
+
+    if(curveIdx2graphPtr.contains(idx))//第idx个曲线正在显示中
+    {
+        QCPGraph* pGraph = curveIdx2graphPtr[idx];
+
+        if(xAxisType == 0)
+            pGraph->addData(times, values);
+        else
+            pGraph->addData(cnts, values);
+    }
+}
+
+void MultiCurvesPlot::setData(const int idx, const QVector<double> &times, const QVector<double> &cnts, const QVector<double> &values)
+{   
+    allCurvesData[idx].timeKeyVec.clear();
+    allCurvesData[idx].cntKeyVec.clear();
+    allCurvesData[idx].valVec.clear();
+
+    allCurvesData[idx].timeKeyVec.append(times);//备份数据源
+    allCurvesData[idx].cntKeyVec.append(cnts);//备份数据源
+    allCurvesData[idx].valVec.append(values);
+
+    if(curveIdx2graphPtr.contains(idx))//第idx个曲线正在显示中
+    {
+        QCPGraph* pGraph = curveIdx2graphPtr[idx];
+        pGraph->data().data()->clear();
+
+        if(xAxisType == 0)
+        {
+            pGraph->setData(times, values);
+        }
+        else
+        {
+            pGraph->setData(cnts, values);
+        }
+    }
+
+    updateTimes = values.size();
+}
+
+void MultiCurvesPlot::clearAllData()
+{
+    m_pActionClear->trigger();
+}
+
+void MultiCurvesPlot::clearIndexData(const int idx)
+{
+    graph(idx)->data().data()->clear();
+    allCurvesData[idx].timeKeyVec.clear();
+    allCurvesData[idx].cntKeyVec.clear();
+    allCurvesData[idx].valVec.clear();
+    updateMyPlot();
+}
+
+void MultiCurvesPlot::updateMyPlot()
+{
+    if(!pauseFlag)
+    {
+        switch (dataShowMode)
+        {
+            case DATASHOWMODE::FixedWindowMode:
+            {
+                if(xAxisType == 0)
+                {
+                    if(updateTimes > xAxisShowRange)
+                    {
+                        double curSeclf = (double)(QDateTime::currentSecsSinceEpoch());
+                        this->xAxis->setRange(curSeclf - xAxisShowRange, curSeclf);
+                    }
+                    else
+                    {
+                        this->xAxis->setRange(m_startTime, m_startTime + xAxisShowRange);
+                    }
+                }
+                else if(xAxisType == 1)
+                {
+                    if(updateTimes>xAxisShowRange)
+                    {
+                        this->xAxis->setRange(updateTimes - xAxisShowRange, updateTimes);
+                    }
+                    else
+                    {
+                        this->xAxis->setRange(0, xAxisShowRange);
+                    }
+                }
+                else if(xAxisType == 2)
+                {
+                    this->xAxis->setRange(1, 100000);
+                }
+                else if(xAxisType == 3)
+                {
+                    ;
+                }
+
+                if(yAxisAuto)
+                {
+//                    graph(0)->rescaleValueAxis(false, true);
+                    this->yAxis->rescale(true);
+                }
+                break;
+            }
+            case DATASHOWMODE::PushMode:
+                this->xAxis->rescale(true);
+                if(yAxisAuto)
+                    this->yAxis->rescale(true);
+                break;
+            default:
+                break;
+        }       
+    }    
+    this->replot();
+}
+
+void MultiCurvesPlot::restoreBeforePlot()
+{
+    if(pauseFlag)
+    {
+        if(m_listZoomLevel.size() > 1)
+        {
+            if(this->xAxis->visible())
+            {
+                this->xAxis->setRange(m_listZoomLevel.at(1).dXLower, m_listZoomLevel.at(1).dXUpper);
+            }
+            if(this->yAxis->visible())
+            {
+                this->yAxis->setRange(m_listZoomLevel.at(1).dYLower, m_listZoomLevel.at(1).dYUpper);
+            }
+            m_listZoomLevel.removeAt(0);
+        }
+        this->replot();
     }
 }
 
 void MultiCurvesPlot::slotRect()
 {
-    pauseFlag = true;
-    emit updatePauseStaSignal(pauseFlag);
+    slotRectFlag = true;
+    if(pauseFlag == false)
+        m_pActionPause->trigger();
 }
 
+void MultiCurvesPlot::slotContexMenu()
+{
+    QAction *pAction = dynamic_cast<QAction*>(sender());
+
+    if(pAction == m_pActionRestoreBefore)
+    {
+        if(m_listZoomLevel.size() < 2)
+            m_pActionContinue->trigger();
+        else
+            restoreBeforePlot();
+    }
+    else if(pAction == m_pActionShowAll)
+    {
+        if(this->actions().contains(m_pActionShowAll))
+        {
+            this->insertAction(m_pActionShowAll, m_pActionShowPart);
+            this->removeAction(m_pActionShowAll);
+        }
+        setDataShowMode(1);
+    }
+    else if(pAction == m_pActionShowPart)
+    {
+        if(this->actions().contains(m_pActionShowPart))
+        {
+            this->insertAction(m_pActionShowPart, m_pActionShowAll);
+            this->removeAction(m_pActionShowPart);
+        }
+        setDataShowMode(0);
+    }
+    else if(pAction == m_pActionPause)
+    {
+        if(this->actions().contains(m_pActionPause))
+        {
+            this->insertAction(m_pActionPause, m_pActionContinue);
+            this->removeAction(m_pActionPause);
+        }
+        emit updatePauseStaSignal(true);
+        setPause(true);
+    }
+    else if(pAction == m_pActionContinue)
+    {
+        m_listZoomLevel.clear();
+        if(this->actions().contains(m_pActionRestoreBefore))
+        {
+            this->removeAction(m_pActionRestoreBefore);
+        }
+        if(this->actions().contains(m_pActionContinue))
+        {
+            this->insertAction(m_pActionContinue, m_pActionPause);
+            this->removeAction(m_pActionContinue);
+        }
+        emit updatePauseStaSignal(false);
+        setPause(false);
+    }
+    else if(pAction == m_pTimeMode)
+    {
+        if(this->actions().contains(m_pTimeMode))
+        {
+            this->insertAction(m_pTimeMode, m_pPointNumMode);
+            this->removeAction(m_pTimeMode);
+        }
+        setXAxisType(0);
+    }
+    else if(pAction == m_pPointNumMode)
+    {
+        if(this->actions().contains(m_pPointNumMode))
+        {
+            this->insertAction(m_pPointNumMode, m_pTimeMode);
+            this->removeAction(m_pPointNumMode);
+        }
+        setXAxisType(1);
+    }
+    else if(pAction == m_pActionClear)
+    {
+        updateTimes = 0;
+        m_listZoomLevel.clear();
+        for(int i = 0; i < graphCount(); i++)
+        {
+            graph(i)->data().data()->clear();
+        }
+        for(int idx = 0; idx < allCurvesData.size(); idx++)
+        {
+            allCurvesData[idx].timeKeyVec.clear();
+            allCurvesData[idx].cntKeyVec.clear();
+            allCurvesData[idx].valVec.clear();
+        }
+    }
+    updateMyPlot();
+}
+
+void MultiCurvesPlot::legendInit()
+{
+    // 设置图例可见
+    this->legend->setVisible(true);
+    // 设置图例颜色
+    this->legend->setBrush(QBrush(QColor(0, 32, 96)));
+    this->legend->setTextColor(QColor(102, 255, 255));
+    // 设置图例位置，这里选择显示在QCPAxisRect下方，同理可设置显示在QCustomPlot中任意位置
+//    this->plotLayout()->addElement(0 , 1, this->legend);
+    // 设置显示比例
+//    this->plotLayout()->setColumnStretchFactor(1, 0.001);
+    // 设置边框隐藏
+    this->legend->setBorderPen(Qt::NoPen);
+}
+
+void MultiCurvesPlot::setCurveColor(int idx, int colorIdx)
+{
+    getColor[idx] = QColor(colorListStr.at(colorIdx));
+}

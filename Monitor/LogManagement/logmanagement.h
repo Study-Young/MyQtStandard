@@ -12,8 +12,7 @@ class LogManagement : public QObject
     Q_OBJECT
 public:
     static LogManagement *getInstance();
-    ~LogManagement();
-    void threadExit();
+    static void deleteInstance();
 
 signals:
     void writeDataToFileRespSignal(QString strFile, bool bOk, QString strArr);
@@ -30,6 +29,7 @@ public slots:
 
 private:
     explicit LogManagement(QObject *parent = nullptr);
+    ~LogManagement();
 
     void mkFileAndWriteData(QString strFileType, QString strContent, QString strFolder1, QString strFolder2, QString strFolder3);
     void mkDirMultiLevel(QString strFilePath);

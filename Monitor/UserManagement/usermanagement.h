@@ -14,7 +14,7 @@ class UserManagement : public QDialog
 
 public:
     static UserManagement* getInstance();
-    ~UserManagement();
+    static void deleteInstance();
 
 public slots:
     void checkUserNamePasswordCompleteSlot(int sta);
@@ -50,6 +50,8 @@ private slots:
 
 private:
     explicit UserManagement(QWidget *parent = nullptr);
+    ~UserManagement();
+
     void uiInit();
     void userInfoTableInit();
 

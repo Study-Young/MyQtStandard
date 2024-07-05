@@ -11,8 +11,8 @@ class MyDataBase : public DataBase
 {
     Q_OBJECT
 public:
-    explicit MyDataBase(QObject *parent = nullptr);
-    ~MyDataBase();
+    static MyDataBase *getInstance();
+    static void deleteInstance();
 
 signals:
     void checkUserNamePasswordCompleteSignal(int sta);
@@ -33,11 +33,14 @@ public slots:
     void initRoleInfoTableSlot();
 
 private:
+    explicit MyDataBase(QObject *parent = nullptr);
+    ~MyDataBase();
+
     void connectSignalSlot();
     void userTableInit();
 
-
 private:
+    static MyDataBase* m_pInstance;
     bool m_checkUserNamePasswordSta;
 };
 

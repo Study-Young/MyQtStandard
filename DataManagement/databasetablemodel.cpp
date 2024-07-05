@@ -57,6 +57,7 @@ QString DataBaseTableModel::queryData()
     jointSql();
 
     this->setQuery(m_fullSql, m_pDataBase);
+
     //计算页数
     QString rlt;
     if(calculatePage(rlt))
@@ -73,7 +74,7 @@ QString DataBaseTableModel::queryData()
  * @brief customQSqlQueryModel::selectData
  * 功能：执行sql查询语句
  */
-bool DataBaseTableModel::selectData(QStringList &dateTimeStr, QVector<double> &dateTimes, QVector<double> &dataKeys, QVector<double> &timeDiffs)
+bool DataBaseTableModel::selectData(QStringList &dateTimeStr, QVector<double> &dateTimes, QVector<double> &dataKeys, QVector<double> &readDatas)
 {
     QSqlQuery query(m_pDataBase);
 
@@ -87,11 +88,60 @@ bool DataBaseTableModel::selectData(QStringList &dateTimeStr, QVector<double> &d
             dataKeys.append(query.value(0).toDouble());
             dateTimeStr.append(query.value(1).toDateTime().toString("yyyy-MM-dd hh:mm:ss"));
             dateTimes.append(query.value(1).toDateTime().toSecsSinceEpoch());
-            timeDiffs.append(query.value(2).toDouble());
+            readDatas.append(query.value(2).toDouble());
             flag = true;
         }
     }
     return flag;
+}
+
+bool DataBaseTableModel::downloadData(QString filePath, QString tableName)
+{
+    QString downDataFileName = QString("%1/%2.csv").arg(filePath).arg(tableName);
+    QFile downFile(downDataFileName);
+    if(!downFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        emit updateMsgSignal(QString("数据导出文件打开失败,%1").arg(downFile.errorString()));
+        return false;
+    }
+
+    QSqlQuery query(m_pDataBase);
+    query.prepare(m_sql);
+
+    QTextStream out(&downFile);
+    out << QString("序号,时间,多通道无缝切换设备参考1PPS-A相差值,多通道无缝切换设备参考1PPS-B相差值,多通道无缝切换设备参考1PPS-C相差值,多通道无缝切换设备参考1PPS-D相差值,"
+           "多通道无缝切换设备参考1PPS-A频率准确度,多通道无缝切换设备参考1PPS-B频率准确度,多通道无缝切换设备参考1PPS-C频率准确度,多通道无缝切换设备参考1PPS-D频率准确度,"
+           "多通道无缝切换设备铷钟频率准确度,信号再生净化设备参考1PPS频率准确度,信号再生净化设备参考1PPS相差值") << "\n";
+    if(query.exec())
+    {
+        while(query.next())
+        {
+            int dataKeys = query.value(0).toDouble();
+            QString dateTimeStr = query.value(1).toDateTime().toString("yyyy-MM-dd hh:mm:ss");
+            qint64 phaseA = query.value(2).toLongLong();
+            qint64 phaseB = query.value(3).toLongLong();
+            qint64 phaseC = query.value(4).toLongLong();
+            qint64 phaseD = query.value(5).toLongLong();
+            double freqA = query.value(6).toDouble();
+            double freqB = query.value(7).toDouble();
+            double freqC = query.value(8).toDouble();
+            double freqD = query.value(9).toDouble();
+            double clockFreq = query.value(10).toDouble();
+            double signalFreq = query.value(11).toDouble();
+            qint64 signalPhase = query.value(12).toLongLong();
+            out << dataKeys << "," << dateTimeStr << ","
+                << phaseA << "," << phaseB << "," << phaseC << "," << phaseD << ","
+                << QString::number(freqA, 'e', 5) << "," << QString::number(freqB, 'e', 5) << ","
+                << QString::number(freqC, 'e', 5) << "," << QString::number(freqD, 'e', 5) << ","
+                << QString::number(clockFreq, 'e', 5) << ","
+                << QString::number(signalFreq, 'e', 5) << "," << signalPhase <<  "\n";
+        }
+    }
+    else
+    {
+        emit updateMsgSignal(QString("读取数据表 %1 数据失败").arg(tableName));
+    }
+    downFile.close();
 }
 
 bool DataBaseTableModel::getDataLen(int &len)

@@ -36,7 +36,6 @@ public:
 
 private slots:
     void on_pushButton_query_clicked();
-    void on_pushButton_showInfo_clicked();
     void on_pushButton_read_clicked();
     void on_pushButton_downLoad_clicked();
     void on_pushButton_firstPage_clicked();
@@ -46,16 +45,13 @@ private slots:
     void on_pushButton_toThePage_clicked();
     void on_pushButton_rowCountsSet_clicked();
     void headerViewOnClicked(int colIndex);
-    void on_pushButton_databaseShowHide_clicked();
+    void on_pushButton_adev_clicked();
     void on_pushButton_tdev_clicked();
-    void on_pushButton_analyzeWidgetShowHide_clicked();
     void on_pushButton_showAll_clicked();
     void on_pushButton_clear_clicked();
 
     void on_pushButton_xAxisType_clicked();
-
     void on_pushButton_plot_clicked();
-
     void on_pushButton_resetTimeRange_clicked();
 
 private:
@@ -77,8 +73,16 @@ private:
     void initDataPlotTable();
     void updateReadDataPlot();
     void updateCalDataPlot(int type);
-    void updateCalDataTable(int type);
+    void updateCalDataTable();
 
+    void calculateFreqAllan(const QVector<double>& valueVct);
+    void calculateTimeIntervalFreqAllan(const double freq, const int interval, const int allanDataIdx);
+    void calculateTdev(const QVector<double>& values);
+    void calculateTimeIntervalTdev(const QVector<double> &values, const int interval, const int tdevDataIdx);
+
+    QString getDataType(int index);
+    QString getPlotYAxisName(int index);
+    int getPlotYAxisType(int index);
 
 private:
     Ui::MainWindow *ui;
@@ -86,23 +90,12 @@ private:
     QSqlDatabase *m_pDataBase;
     DataBaseTableModel *m_pModel;
     QTableView *m_pTableView;           //数据表
-    int m_screenWidth;
-    int m_screenHeight;
-    int m_databaseWidgetWidth;
-    int m_analyzeWidgetWidth;
-    int m_width;
-    int m_height;
 
-    const QString m_databaseName = "TCOP.db";
+    const QString m_databaseName = "RF4600.db";
     QString m_selectDataTableName;
     QString m_selectDeviceInfoTableName;
-    uint m_selectDeviceId;
-    uint m_selectLinkId;
-    uint m_selectDeviceType;
-    QString m_selectDeviceIp;
 
     QString m_selectDeviceDataStr;
-    bool m_selectDeviceDataFlag;
 
     QString m_dataStartTime;
     QString m_dataEndTime;
@@ -111,15 +104,16 @@ private:
     QStringList m_dateTimeStr;
     QVector<double> m_dateTimes;
     QVector<double> m_dataKeys;
-    QVector<double> m_timeDiffs;
+    QVector<double> m_readDatas;
 
     MultiCurvesPlot *m_oriDataPlot;
     MultiCurvesPlot *m_calDataPlot;
     CalDataTableModel *m_calDataTableModel;
     QTableView *m_calDataTableView;
 
-    QVector<double> m_tdevKeys;
-    QVector<double> m_tdevValues;
-    bool m_tdevFirstFlag = true;
+    QVector<double> m_calIndex;
+    QVector<double> m_calValues;
+    FreqAllanStruct m_allanData[CAL_INTERVAL_CNT];
+    TdevStruct m_tdevData[CAL_INTERVAL_CNT];
 };
 #endif // MAINWINDOW_H

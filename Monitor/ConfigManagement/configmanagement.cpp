@@ -3,6 +3,21 @@
 #include <QMessageBox>
 #include <QFile>
 
+ConfigManagement *ConfigManagement::m_pInstance = nullptr;
+ConfigManagement *ConfigManagement::getInstance()
+{
+    if(m_pInstance == nullptr)
+    {
+        m_pInstance = new ConfigManagement();
+    }
+    return m_pInstance;
+}
+
+void ConfigManagement::deleteInstance()
+{
+    delete m_pInstance;
+}
+
 ConfigManagement::ConfigManagement(QObject *parent) : QObject(parent)
 {
     mainInit();
@@ -12,16 +27,6 @@ ConfigManagement::ConfigManagement(QObject *parent) : QObject(parent)
 ConfigManagement::~ConfigManagement()
 {
 
-}
-
-ConfigManagement *ConfigManagement::m_pInstance = nullptr;
-ConfigManagement *ConfigManagement::getInstance()
-{
-    if(m_pInstance == nullptr)
-    {
-        m_pInstance = new ConfigManagement();
-    }
-    return m_pInstance;
 }
 
 void ConfigManagement::mainInit()
